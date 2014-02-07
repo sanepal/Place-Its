@@ -10,7 +10,9 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.view.Menu;
+import android.view.MenuItem;
 
 public class MainActivity extends Activity implements OnMapClickListener {
     private GoogleMap map;
@@ -53,6 +55,20 @@ public class MainActivity extends Activity implements OnMapClickListener {
         });         
         AlertDialog alert = builder.create();
         alert.show();        
+    }
+    @Override
+    public boolean onOptionsItemSelected (MenuItem item) {
+        switch(item.getItemId()) {
+        case R.id.action_placeits:
+            displayPlaceitsList();
+            return true;
+        }
+        return false;
+    }
+
+    private void displayPlaceitsList() {
+        Intent intent = new Intent(this, ListActivity.class);
+        startActivity(intent);        
     }
 
 }
