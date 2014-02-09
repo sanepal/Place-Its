@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/input_root"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <EditText
+        android:id="@+id/input_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:ems="10"
+        android:hint="@string/input_title" >
+
+        <requestFocus />
+    </EditText>
+
+    <EditText
+        android:id="@+id/input_desc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/input_title"
+        android:ems="10"
+        android:hint="@string/input_desc" />
+
+    <Spinner
+        android:id="@+id/spinner1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:entries="@array/days"
+        android:prompt="@string/input_day"
+        android:layout_below="@+id/switch1" />
+
+    <Spinner
+        android:id="@+id/spinner2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/spinner1"
+        android:layout_below="@+id/switch1"
+        android:layout_alignTop="@+id/spinner1"
+        android:entries="@array/repeat"
+        android:prompt="@string/input_rep" />
+
+    <Switch
+        android:id="@+id/switch1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/input_desc"
+        android:text="@string/schedule_prompt"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+</RelativeLayout>

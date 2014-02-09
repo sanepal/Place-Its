@@ -13,4 +13,27 @@
     <string name="list_section2">Pulled Down</string>
     <string name="list_section3">Expired</string>
 
+    <string name="input_title">Title</string>
+    <string name="input_desc">Description</string>
+    
+    <string name="schedule_prompt">Schedule?</string>
+    <string name="input_day">Day</string>
+    <string name="input_rep">Repeat</string>
+    <string-array name="days">
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednesday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+        <item>Saturday</item>
+        <item>Sunday</item>
+    </string-array>
+    <string-array name="repeat">
+        <item>Every 1 week</item>
+        <item>Every 2 week</item>
+        <item>Every 3 week</item>
+        <item>Every 4 week</item>
+    </string-array>
+    
+    <string name="prompt">Create Place It here?</string>
 </resources>
