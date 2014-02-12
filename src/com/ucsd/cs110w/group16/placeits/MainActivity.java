@@ -7,18 +7,25 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 public class MainActivity extends Activity implements OnMapClickListener {
     private GoogleMap map;
+    static Handler handler = new Handler();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,17 +50,14 @@ public class MainActivity extends Activity implements OnMapClickListener {
     }
 
     @Override
-    public void onMapClick(final LatLng arg0) {
+    public void onMapClick(final LatLng location) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);    
-        builder.setMessage("Create Place-It here?");                
+        builder.setMessage(R.string.prompt);                
         builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {         
            @Override
-           public void onClick(DialogInterface dialog, int which) {                 
-               map.addMarker(new MarkerOptions()
-               .position(arg0)
-               .title("Hello world"));      
-               //
-                dialog.dismiss();
+           public void onClick(DialogInterface dialog, int which) {                              
+               dialog.dismiss();
+               showInputDialog(location);
            }         
         });        
         builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {         
@@ -79,6 +83,44 @@ public class MainActivity extends Activity implements OnMapClickListener {
     private void displayPlaceitsList() {
         Intent intent = new Intent(this, ListActivity.class);
         startActivity(intent);        
+    }
+    
+    private void showInputDialog(final LatLng location) {
+        //Preparing views
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        //the edit text's are part of the relative layout viewgroup in the layout file
+        View layout = inflater.inflate(R.layout.input_details, (ViewGroup) findViewById(R.id.input_root));
+        final EditText inputTitle = (EditText) layout.findViewById(R.id.input_title);
+        final EditText inputDesc = (EditText) layout.findViewById(R.id.input_desc);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(layout);
+        builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();                
+                map.addMarker(new MarkerOptions()
+                .position(location)
+                .title(inputTitle.getText().toString())
+                .snippet(inputDesc.getText().toString()));
+                //TODO check value from switch, get values from drop downs if on, pass them along
+                //TODO check inputs for empty values
+                registerPlaceit(inputTitle.getText().toString(), inputDesc.getText().toString(), location);
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();     
+    }
+
+    protected void registerPlaceit(String title, String desc, LatLng location) {
+        Toast.makeText(getApplicationContext(), "Place it created: " + title + " " + desc, Toast.LENGTH_LONG).show();     
+        //TODO implement registerPlaceit
+        //register the place it 
     }
 
 }
