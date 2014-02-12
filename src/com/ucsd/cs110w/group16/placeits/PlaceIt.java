@@ -5,7 +5,7 @@ public class PlaceIt
 	String name, description;
 	boolean status;
 	String alarmID, geofenceID;
-	int ID;
+	Integer ID;
 	double longitude, latitude;
 	
 	//Sets the name of the PlaceIt to be displayed on map
@@ -75,7 +75,7 @@ public class PlaceIt
 	}
 	
 	//Get the ID of the PlaceIt
-	public int getID()
+	public Integer getID()
 	{
 		return ID;
 	}
@@ -97,6 +97,13 @@ public class PlaceIt
 	public double getLongitude() 
 	{
 		return latitude;
+	}
+	
+	public boolean equals(PlaceIt p)
+	{
+		if (this.ID.equals(p.ID))
+			return true;
+		return false;
 	}
 	
 }
