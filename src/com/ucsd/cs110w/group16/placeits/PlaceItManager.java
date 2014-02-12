@@ -49,7 +49,7 @@ public class PlaceItManager
 		return list;
 	}
 	
-	public PlaceIt getPlaceIt(int ID)
+	public PlaceIt getPlaceIt(long ID)
 	{
 		for (int i = 0; i < placeits.size(); i++)
 		{
