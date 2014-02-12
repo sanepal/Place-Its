@@ -44,7 +44,17 @@ public class SearchResultsActivity extends FragmentActivity {
                 }
                 else {
                     if (results.size() > 0) {
-                        listView.setAdapter(new ArrayAdapter<Address>(this, R.layout.basic_textview, results));
+                        String arrResult[] = new String[results.size()];
+                        for (int j=0; j<results.size(); j++){
+                            Address result = results.get(j);
+                            StringBuilder strResult = new StringBuilder();
+                            for(int i=0; i<result.getMaxAddressLineIndex(); i++) {
+                                strResult.append(result.getAddressLine(i)).append("\n");
+                            }
+                            arrResult[j] = strResult.toString();
+                        }
+                        listView.setAdapter(new ArrayAdapter<String>(this, R.layout.basic_textview, arrResult));
+
                     }
                 }
             } catch (IOException e) {
