@@ -8,6 +8,10 @@
 package com.ucsd.cs110w.group16.placeits;
 
 public final class R {
+    public static final class array {
+        public static final int days=0x7f0a0000;
+        public static final int repeat=0x7f0a0001;
+    }
     public static final class attr {
         /** 
     The size of the ad. It must be one of BANNER, FULL_BANNER, LEADERBOARD,
@@ -222,10 +226,13 @@ containing a value of this type.
         public static final int ic_plusone_tall_off_client=0x7f02001d;
     }
     public static final class id {
-        public static final int action_placeits=0x7f06000b;
-        public static final int action_search=0x7f06000a;
-        public static final int action_settings=0x7f060009;
+        public static final int action_placeits=0x7f060011;
+        public static final int action_search=0x7f060010;
+        public static final int action_settings=0x7f06000f;
         public static final int hybrid=0x7f060004;
+        public static final int input_desc=0x7f06000b;
+        public static final int input_root=0x7f060009;
+        public static final int input_title=0x7f06000a;
         public static final int list=0x7f060007;
         public static final int map=0x7f060006;
         public static final int none=0x7f060000;
@@ -233,6 +240,9 @@ containing a value of this type.
         public static final int pager=0x7f060005;
         public static final int satellite=0x7f060002;
         public static final int section_label=0x7f060008;
+        public static final int spinner1=0x7f06000c;
+        public static final int spinner2=0x7f06000e;
+        public static final int switch1=0x7f06000d;
         public static final int terrain=0x7f060003;
     }
     public static final class integer {
@@ -244,10 +254,11 @@ containing a value of this type.
         public static final int activity_searchresults=0x7f030002;
         public static final int basic_textview=0x7f030003;
         public static final int fragment_main_dummy=0x7f030004;
+        public static final int input_details=0x7f030005;
     }
     public static final class menu {
-        public static final int list_menu=0x7f0b0000;
-        public static final int main=0x7f0b0001;
+        public static final int list_menu=0x7f0c0000;
+        public static final int main=0x7f0c0001;
     }
     public static final class string {
         public static final int action_placeits=0x7f07001c;
@@ -348,9 +359,15 @@ containing a value of this type.
         /**  Long form sign-in button text [CHAR LIMIT=30] 
          */
         public static final int common_signin_button_text_long=0x7f070013;
+        public static final int input_day=0x7f070025;
+        public static final int input_desc=0x7f070023;
+        public static final int input_rep=0x7f070026;
+        public static final int input_title=0x7f070022;
         public static final int list_section1=0x7f07001f;
         public static final int list_section2=0x7f070020;
         public static final int list_section3=0x7f070021;
+        public static final int prompt=0x7f070027;
+        public static final int schedule_prompt=0x7f070024;
         public static final int search_hint=0x7f07001e;
     }
     public static final class style {
@@ -375,11 +392,11 @@ containing a value of this type.
     
  API 14 theme customizations can go here. 
          */
-        public static final int AppBaseTheme=0x7f0a0000;
+        public static final int AppBaseTheme=0x7f0b0000;
         /**  Application theme. 
  All customizations that are NOT specific to a particular API-level can go here. 
          */
-        public static final int AppTheme=0x7f0a0001;
+        public static final int AppTheme=0x7f0b0001;
     }
     public static final class xml {
         public static final int searchable=0x7f040000;
