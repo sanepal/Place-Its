@@ -5,7 +5,7 @@ public class PlaceIt
 	String name, description;
 	boolean status;
 	String alarmID, geofenceID;
-	Integer ID;
+	Long ID;
 	double longitude, latitude;
 	
 	//Sets the name of the PlaceIt to be displayed on map
@@ -69,13 +69,13 @@ public class PlaceIt
 	}
 	
 	//Set the ID of the PlaceIt
-	public void setID(int id)
+	public void setID(long id)
 	{
 		this.ID = id;
 	}
 	
 	//Get the ID of the PlaceIt
-	public Integer getID()
+	public Long getID()
 	{
 		return ID;
 	}
