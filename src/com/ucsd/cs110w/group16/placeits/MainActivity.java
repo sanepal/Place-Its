@@ -7,6 +7,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -33,17 +34,44 @@ public class MainActivity extends Activity implements OnMapClickListener, OnMark
     private GoogleMap map;
     private Marker searchResult = null;
     private MenuItem searchItem;
-
+    
+    private CameraPositionStore mPrefs;
+    
+    /*
+     * (non-Javadoc)
+     * @see android.app.Activity#onCreate(android.os.Bundle)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mPrefs = new CameraPositionStore(this);
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
                 .getMap();
         map.setMyLocationEnabled(true);
         map.setOnMapClickListener(this);
         map.setOnMarkerClickListener(this);
         handleIntent(getIntent());
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see android.app.Activity#onResume()
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        map.animateCamera(CameraUpdateFactory.newCameraPosition(mPrefs.getCameraPosition()));
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see android.app.Activity#onPause()
+     */
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mPrefs.setCameraPosition(map.getCameraPosition());
     }
     
     @Override
@@ -131,7 +159,10 @@ public class MainActivity extends Activity implements OnMapClickListener, OnMark
         AlertDialog alert = builder.create();
         alert.show();
     }
-
+    
+    /*
+     * Move camera to the passed in latitude, longitude
+     */
     protected void moveCamera(double latitude, double longitude) {
         map.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(latitude,
                 longitude)));
