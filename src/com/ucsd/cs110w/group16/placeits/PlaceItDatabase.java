@@ -74,7 +74,7 @@ public class PlaceItDatabase {
 		database.delete(PlaceItDatabaseHelper.TABLE_NAME, PlaceItDatabaseHelper.COLUMN_ID + " = " + id, null);
 	}
 	
-	public PlaceIt getPlaceIt(Integer id) {
+	public PlaceIt getPlaceIt(Long id) {
 		// Retrieve the object with matching ID from the database.
 		Cursor cursor = database.query(PlaceItDatabaseHelper.TABLE_NAME, PlaceItDatabaseHelper.ALL_COLUMNS,
 				PlaceItDatabaseHelper.COLUMN_ID + "=" + id, null, null, null, null);

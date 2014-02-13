@@ -37,8 +37,7 @@ public class PlaceItManager {
     private List<String> mGeofenceIdsToRemove;
     private PlaceItDatabase mDb;
     List<Geofence> mCurrentGeofences;
-    List<PlaceIt> placeits = new ArrayList<PlaceIt>();
-    
+
     public PlaceItManager(Context mContext) {
         this.mContext = mContext;
         mActivity = (Activity) mContext;
@@ -291,97 +290,34 @@ public class PlaceItManager {
         }
     }
     
-	/*public void addUnscheduledPlaceIt(PlaceIt p)
-	{
-		placeits.add(p);
-	}
-	
-	public void addScheduledPlaceIt(int dayOfWeek, int WeekPeriod, PlaceIt p)
-	{
-		
-	}
-	
-	public List getActivePlaceIts()
-	{
-		List<PlaceIt> list = new ArrayList<PlaceIt>();
-		
-		for (int i = 0; i < placeits.size(); i++)
-		{
-			PlaceIt current = placeits.get(i);
-			if (current.isActive())
-			{
-				list.add(current);
-			}
-		}
-		
-		return list;
-	}
-	
-	public List getInActivePlaceIts()
-	{
-		List<PlaceIt> list = new ArrayList<PlaceIt>();
-		
-		for (int i = 0; i < placeits.size(); i++)
-		{
-			PlaceIt current = placeits.get(i);
-			if (!current.isActive())
-			{
-				list.add(current);
-			}
-		}
-		
-		return list;
-	}
-	
-	public PlaceIt getPlaceIt(long ID)
-	{
-		for (int i = 0; i < placeits.size(); i++)
-		{
-			PlaceIt current = placeits.get(i);
-			if (current.getId().equals(ID))
-			{
-				return current;
-			}
-		}
-		return null;
-	}
-	
-	public void removePlaceIt(PlaceIt p)
-	{
-		for (int i = 0; i < placeits.size(); i++)
-		{
-			PlaceIt current = placeits.get(i);
-			if (current.equals(p))
-			{
-				placeits.remove(i);
-				break;
-			}
-		}
-	}
-	
-	public void setInActive(PlaceIt p)
-	{
-		for (int i = 0; i < placeits.size(); i++)
-		{
-			PlaceIt current = placeits.get(i);
-			if (current.equals(p))
-			{
-				current.setStatus(true);
-				break;
-			}
-		}
-	}
-	
-	public void setActive(PlaceIt p)
-	{
-		for (int i = 0; i < placeits.size(); i++)
-		{
-			PlaceIt current = placeits.get(i);
-			if (current.equals(p))
-			{
-				current.setStatus(false);
-				break;
-			}
-		}
-	}*/
+    public List getActivePlaceIts()
+    {
+    	return mDb.getAllActive();
+    }
+    
+    public List getInActivePlaceIts()
+    {
+    	return mDb.getAllInactive();
+    }
+    
+    
+    public PlaceIt getPlaceIt(Long id)
+    {
+    	return mDb.getPlaceIt(id);
+    }
+    
+    public void setInActive(PlaceIt p)
+    {
+    	
+    }
+    
+    public void setActive(PlaceIt p)
+    {
+    	
+    }
+    
+    public void removePlaceIt(PlaceIt p)
+    {
+    	mDb.deletePlaceIt(p);
+    }
 }
