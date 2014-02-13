@@ -26,9 +26,9 @@ public class CameraPositionStore {
      * TODO set defaults instead of 0 
      */
     public CameraPosition getCameraPosition() {
-        double lat = mPrefs.getFloat(SHARED_PREFERENCE_NAME+"_latitude", 0);
-        double lng = mPrefs.getFloat(SHARED_PREFERENCE_NAME+"_longitude", 0);
-        float zoom = mPrefs.getFloat(SHARED_PREFERENCE_NAME+"_zoom", 0);
+        double lat = mPrefs.getFloat(SHARED_PREFERENCE_NAME+"_latitude", (float) 32.0);
+        double lng = mPrefs.getFloat(SHARED_PREFERENCE_NAME+"_longitude", (float)-117.0);
+        float zoom = mPrefs.getFloat(SHARED_PREFERENCE_NAME+"_zoom", 1.0f);
         return new CameraPosition(new LatLng(lat, lng), zoom, 0, 0);
     }
     
