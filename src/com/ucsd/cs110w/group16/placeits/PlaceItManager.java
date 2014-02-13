@@ -51,6 +51,13 @@ public class PlaceItManager {
     }
     
     /**
+     * Close the database and do anything else that needs to be done on close.
+     */
+    void close() {
+    	mDb.close();
+    }
+    
+    /**
      * Verify that Google Play services is available before making a request.
      *
      * @return true if Google Play services is available, otherwise false
@@ -223,7 +230,7 @@ public class PlaceItManager {
          * ID to "1". This is a "flattened" object that contains
          * a set of strings
          */
-        Integer id = 1;
+        //Integer id = 1;
         PlaceIt mPlaceIt = mDb.createPlaceIt(arg0.latitude, arg0.longitude, title, desc, true);
         /*mUIGeofence1 = new SimpleGeofence(
                 "1",
@@ -290,12 +297,12 @@ public class PlaceItManager {
         }
     }
     
-    public List getActivePlaceIts()
+    public List<PlaceIt> getActivePlaceIts()
     {
     	return mDb.getAllActive();
     }
     
-    public List getInActivePlaceIts()
+    public List<PlaceIt> getInActivePlaceIts()
     {
     	return mDb.getAllInactive();
     }
@@ -320,6 +327,7 @@ public class PlaceItManager {
     
     public void removePlaceIt(PlaceIt p)
     {
+    	// Do we need to remove from the geofence here?
     	mDb.deletePlaceIt(p);
     }
 }
