@@ -221,6 +221,10 @@ public class PlaceIt {
     public boolean isActive() {
         return isActive;
     }
+    
+    public void setStatus(boolean status){
+    	isActive = status;
+    }
 
     /**
      * Creates a Location Services Geofence object from a

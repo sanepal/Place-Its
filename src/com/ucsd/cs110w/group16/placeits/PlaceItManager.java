@@ -308,12 +308,14 @@ public class PlaceItManager {
     
     public void setInActive(PlaceIt p)
     {
-    	
+    	p.setStatus(false);
+    	mDb.updatePlaceIt(p);
     }
     
     public void setActive(PlaceIt p)
     {
-    	
+    	p.setStatus(true);
+    	mDb.updatePlaceIt(p);
     }
     
     public void removePlaceIt(PlaceIt p)
