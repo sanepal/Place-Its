@@ -38,7 +38,7 @@ public class PlaceItDatabase {
 		values.put(PlaceItDatabaseHelper.COLUMN_STATUS, active);
 		
 		// Insert values into database and get the ID.
-		long insertID = database.insert(PlaceItDatabaseHelper.TABLE_NAME, null, values);
+		Integer insertID = (int) database.insert(PlaceItDatabaseHelper.TABLE_NAME, null, values);
 		
 		// Retrieve the new entry from the database.
 		Cursor cursor = database.query(PlaceItDatabaseHelper.TABLE_NAME,
@@ -56,11 +56,11 @@ public class PlaceItDatabase {
 	public void updatePlaceIt(PlaceIt placeIt) {
 		// Fill-in the key/value pairs, including the ID.
 		ContentValues values = new ContentValues();
-		values.put(PlaceItDatabaseHelper.COLUMN_ID, placeIt.getID());
+		values.put(PlaceItDatabaseHelper.COLUMN_ID, placeIt.getId());
 		values.put(PlaceItDatabaseHelper.COLUMN_LATITUDE, placeIt.getLatitude());
 		values.put(PlaceItDatabaseHelper.COLUMN_LONGITUDE, placeIt.getLongitude());
-		values.put(PlaceItDatabaseHelper.COLUMN_NAME, placeIt.getName());
-		values.put(PlaceItDatabaseHelper.COLUMN_DESCRIPTION, placeIt.getDescription());
+		values.put(PlaceItDatabaseHelper.COLUMN_NAME, placeIt.getTitle());
+		values.put(PlaceItDatabaseHelper.COLUMN_DESCRIPTION, placeIt.getDesc());
 		values.put(PlaceItDatabaseHelper.COLUMN_STATUS, placeIt.isActive());
 		
 		// Update the values in the database.
@@ -68,13 +68,13 @@ public class PlaceItDatabase {
 	}
 	
 	public void deletePlaceIt(PlaceIt placeIt) {
-		long id = placeIt.getID();
+		Integer id = placeIt.getIntId();
 		
 		// Delete the object with matching ID from the database.
 		database.delete(PlaceItDatabaseHelper.TABLE_NAME, PlaceItDatabaseHelper.COLUMN_ID + " = " + id, null);
 	}
 	
-	public PlaceIt getPlaceIt(long id) {
+	public PlaceIt getPlaceIt(Integer id) {
 		// Retrieve the object with matching ID from the database.
 		Cursor cursor = database.query(PlaceItDatabaseHelper.TABLE_NAME, PlaceItDatabaseHelper.ALL_COLUMNS,
 				PlaceItDatabaseHelper.COLUMN_ID + "=" + id, null, null, null, null);
@@ -115,12 +115,14 @@ public class PlaceItDatabase {
 	
 	private PlaceIt cursorToPlaceIt(Cursor cursor) {
 		// Create new object and fill with values from the database.
-		PlaceIt placeIt = new PlaceIt();
-		placeIt.setID(cursor.getLong(0));
-		placeIt.setPosition(cursor.getDouble(1), cursor.getDouble(2));
-		placeIt.setName(cursor.getString(3));
-		placeIt.setDescription(cursor.getString(4));
-		placeIt.setStatus(cursor.getInt(5) == 1);
+		PlaceIt placeIt = new PlaceIt(
+		        cursor.getInt(0),
+		        cursor.getString(3),
+		        cursor.getString(4),
+		        cursor.getDouble(1),
+		        cursor.getDouble(2),
+		        cursor.getInt(5) == 1
+		        );
 		return placeIt;
 	}
 }

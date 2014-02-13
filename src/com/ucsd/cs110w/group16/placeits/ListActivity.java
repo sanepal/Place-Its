@@ -128,7 +128,7 @@ public class ListActivity extends FragmentActivity implements
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 3;
+            return 2;
         }
 
         @Override
@@ -139,8 +139,6 @@ public class ListActivity extends FragmentActivity implements
                 return getString(R.string.list_section1).toUpperCase(l);
             case 1:
                 return getString(R.string.list_section2).toUpperCase(l);
-            case 2:
-                return getString(R.string.list_section3).toUpperCase(l);
             }
             return null;
         }

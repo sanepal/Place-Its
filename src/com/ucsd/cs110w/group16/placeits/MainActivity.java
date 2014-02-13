@@ -7,7 +7,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -17,9 +16,14 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.SearchManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,9 +37,18 @@ import android.widget.Toast;
 public class MainActivity extends Activity implements OnMapClickListener, OnMarkerClickListener {
     private GoogleMap map;
     private Marker searchResult = null;
-    private MenuItem searchItem;
-    
+    private MenuItem searchItem;    
     private CameraPositionStore mPrefs;
+    private PlaceItManager placeItManager;
+    
+    /*
+     * An instance of an inner class that receives broadcasts from listeners and from the
+     * IntentService that receives geofence transition events
+     */
+    private GeofenceSampleReceiver mBroadcastReceiver;
+
+    // An intent filter for the broadcast receiver
+    private IntentFilter mIntentFilter;
     
     /*
      * (non-Javadoc)
@@ -45,7 +58,25 @@ public class MainActivity extends Activity implements OnMapClickListener, OnMark
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // Create a new broadcast receiver to receive updates from the listeners and service
+        mBroadcastReceiver = new GeofenceSampleReceiver();
+
+        // Create an intent filter for the broadcast receiver
+        mIntentFilter = new IntentFilter();
+
+        // Action for broadcast Intents that report successful addition of geofences
+        mIntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCES_ADDED);
+
+        // Action for broadcast Intents that report successful removal of geofences
+        mIntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCES_REMOVED);
+
+        // Action for broadcast Intents containing various types of geofencing errors
+        mIntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCE_ERROR);
+
+        // All Location Services sample apps use this category
+        mIntentFilter.addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES);
         mPrefs = new CameraPositionStore(this);
+        placeItManager = new PlaceItManager(this);
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
                 .getMap();
         map.setMyLocationEnabled(true);
@@ -61,6 +92,8 @@ public class MainActivity extends Activity implements OnMapClickListener, OnMark
     @Override
     protected void onResume() {
         super.onResume();
+        // Register the broadcast receiver to receive status updates
+        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, mIntentFilter);
         map.animateCamera(CameraUpdateFactory.newCameraPosition(mPrefs.getCameraPosition()));
     }
     
@@ -252,7 +285,7 @@ public class MainActivity extends Activity implements OnMapClickListener, OnMark
                                 .snippet(inputDesc.getText().toString()));
                         // TODO get values from dropdown boxes
                         // TODO check inputs for empty values
-                        registerPlaceit(inputTitle.getText().toString(),
+                        placeItManager.registerPlaceIt(inputTitle.getText().toString(),
                                 inputDesc.getText().toString(), location);
                     }
                 });
@@ -283,6 +316,82 @@ public class MainActivity extends Activity implements OnMapClickListener, OnMark
     private void displayPlaceitsList() {
         Intent intent = new Intent(this, ListActivity.class);
         startActivity(intent);
+    }
+    
+    /**
+     * Define a Broadcast receiver that receives updates from connection listeners and
+     * the geofence transition service.
+     */
+    public class GeofenceSampleReceiver extends BroadcastReceiver {
+        /*
+         * Define the required method for broadcast receivers
+         * This method is invoked when a broadcast Intent triggers the receiver
+         */
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            // Check the action code and determine what to do
+            String action = intent.getAction();
+
+            // Intent contains information about errors in adding or removing geofences
+            if (TextUtils.equals(action, GeofenceUtils.ACTION_GEOFENCE_ERROR)) {
+
+                handleGeofenceError(context, intent);
+
+            // Intent contains information about successful addition or removal of geofences
+            } else if (
+                    TextUtils.equals(action, GeofenceUtils.ACTION_GEOFENCES_ADDED)
+                    ||
+                    TextUtils.equals(action, GeofenceUtils.ACTION_GEOFENCES_REMOVED)) {
+
+                handleGeofenceStatus(context, intent);
+
+            // Intent contains information about a geofence transition
+            } else if (TextUtils.equals(action, GeofenceUtils.ACTION_GEOFENCE_TRANSITION)) {
+
+                handleGeofenceTransition(context, intent);
+
+            // The Intent contained an invalid action
+            } else {
+                Log.e(GeofenceUtils.APPTAG, getString(R.string.invalid_action_detail, action));
+                Toast.makeText(context, R.string.invalid_action, Toast.LENGTH_LONG).show();
+            }
+        }
+
+        /**
+         * If you want to display a UI message about adding or removing geofences, put it here.
+         *
+         * @param context A Context for this component
+         * @param intent The received broadcast Intent
+         */
+        private void handleGeofenceStatus(Context context, Intent intent) {
+
+        }
+
+        /**
+         * Report geofence transitions to the UI
+         *
+         * @param context A Context for this component
+         * @param intent The Intent containing the transition
+         */
+        private void handleGeofenceTransition(Context context, Intent intent) {
+            /*
+             * If you want to change the UI when a transition occurs, put the code
+             * here. The current design of the app uses a notification to inform the
+             * user that a transition has occurred.
+             */
+        }
+
+        /**
+         * Report addition or removal errors to the UI, using a Toast
+         *
+         * @param intent A broadcast Intent sent by ReceiveTransitionsIntentService
+         */
+        private void handleGeofenceError(Context context, Intent intent) {
+            String msg = intent.getStringExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS);
+            Log.e(GeofenceUtils.APPTAG, msg);
+            Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+        }
     }
 
 }
