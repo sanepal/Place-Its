@@ -28,7 +28,6 @@ public class PlaceItDatabase {
 	
 	public PlaceIt createPlaceIt(double latitude, double longitude, String name,
 			String description, boolean active) {
-		
 		// Add values to key/value pair object.
 		ContentValues values = new ContentValues();
 		values.put(PlaceItDatabaseHelper.COLUMN_LATITUDE, latitude);
@@ -100,7 +99,7 @@ public class PlaceItDatabase {
 		// Return all rows with matching status value.
 		int value = status ? 1 : 0;
 		Cursor cursor = database.query(PlaceItDatabaseHelper.TABLE_NAME, PlaceItDatabaseHelper.ALL_COLUMNS,
-				PlaceItDatabaseHelper.COLUMN_STATUS + "=" + value, null, null, null, null);
+				PlaceItDatabaseHelper.COLUMN_STATUS + "=" + value, null, null, null, PlaceItDatabaseHelper.COLUMN_ID+" DESC");
 		
 		cursor.moveToFirst();
 		while (!cursor.isAfterLast()) {

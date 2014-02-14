@@ -22,12 +22,15 @@ import java.util.List;
  * the event.
  */
 public class ReceiveTransitionsIntentService extends IntentService {
+    
+    private PlaceItManager placeItManager;
 
     /**
      * Sets an identifier for this class' background thread
      */
     public ReceiveTransitionsIntentService() {
         super("ReceiveTransitionsIntentService");
+        
     }
 
     /**
@@ -135,19 +138,21 @@ public class ReceiveTransitionsIntentService extends IntentService {
 
         // Get a notification builder that's compatible with platform versions >= 4
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-
+        
+        placeItManager = new PlaceItManager(getApplicationContext());
+        PlaceIt activatedPlaceit = placeItManager.getPlaceIt((long) Integer.parseInt(ids));
         // Set the notification contents
         builder.setSmallIcon(R.drawable.ic_notification)
-               .setContentTitle(
-                       getString(R.string.geofence_transition_notification_title,
-                               transitionType, ids))
-               .setContentText(getString(R.string.geofence_transition_notification_text))
-               .setContentIntent(notificationPendingIntent);
+               .setContentTitle(activatedPlaceit.getTitle())
+               .setContentText(activatedPlaceit.getDesc())
+               .setContentIntent(notificationPendingIntent)
+               .addAction(R.drawable.ic_snooze, "Snooze", notificationPendingIntent)
+               .addAction(R.drawable.ic_dismiss, "Dismiss", notificationPendingIntent);
 
         // Get an instance of the Notification manager
         NotificationManager mNotificationManager =
             (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
+        
         // Issue the notification
         mNotificationManager.notify(0, builder.build());
     }

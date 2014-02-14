@@ -1,9 +1,11 @@
 package com.ucsd.cs110w.group16.placeits;
 
+import java.util.List;
 import java.util.Locale;
 
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
+import android.location.Address;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -17,7 +19,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class ListActivity extends FragmentActivity implements
         ActionBar.TabListener {
@@ -36,6 +42,8 @@ public class ListActivity extends FragmentActivity implements
      * The {@link ViewPager} that will host the section contents.
      */
     ViewPager mViewPager;
+
+    private static PlaceItManager placeItManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +84,7 @@ public class ListActivity extends FragmentActivity implements
                     .setText(mSectionsPagerAdapter.getPageTitle(i))
                     .setTabListener(this));
         }
+        placeItManager = new PlaceItManager(this);
     }
 
     @Override
@@ -127,7 +136,7 @@ public class ListActivity extends FragmentActivity implements
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
+            // Show 2 total pages.
             return 2;
         }
 
@@ -163,13 +172,38 @@ public class ListActivity extends FragmentActivity implements
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main_dummy,
                     container, false);
-            TextView dummyTextView = (TextView) rootView
+            /*
+             * TextView dummyTextView = (TextView) rootView
+             * .findViewById(R.id.section_label);
+             * dummyTextView.setText(Integer.toString(getArguments().getInt(
+             * ARG_SECTION_NUMBER)));
+             */
+            List<PlaceIt> storedPlaceIts;
+            if (getArguments().getInt(ARG_SECTION_NUMBER) == 1)
+                storedPlaceIts = placeItManager.getActivePlaceIts();
+            else
+                storedPlaceIts = placeItManager.getInActivePlaceIts();
+            ListView dummyListView = (ListView) rootView
                     .findViewById(R.id.section_label);
-            dummyTextView.setText(Integer.toString(getArguments().getInt(
-                    ARG_SECTION_NUMBER)));
+            String arrResult[] = new String[storedPlaceIts.size()];
+            for (int j = 0; j < storedPlaceIts.size(); j++) {
+                PlaceIt result = storedPlaceIts.get(j);
+                StringBuilder strResult = new StringBuilder();
+                strResult.append(result.getTitle()).append("\n");
+                strResult.append(result.getDesc());
+                arrResult[j] = strResult.toString();
+            }
+            // Button mBtn = ((Button) inflater.inflate(R.layout.input_details,
+            // container,false).findViewById(R.id.btnList));
+            // mBtn.setText("Remove");
+            if (getArguments().getInt(ARG_SECTION_NUMBER) == 1)
+                dummyListView.setAdapter(new ArrayAdapter<String>(getActivity(),
+                    R.layout.list_repost, R.id.text, arrResult));
+            else 
+                dummyListView.setAdapter(new ArrayAdapter<String>(getActivity(),
+                        R.layout.list_delete, R.id.text, arrResult));
             return rootView;
         }
     }
 
 }
-

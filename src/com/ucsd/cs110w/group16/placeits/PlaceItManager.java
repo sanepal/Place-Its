@@ -40,9 +40,9 @@ public class PlaceItManager {
 
     public PlaceItManager(Context mContext) {
         this.mContext = mContext;
-        mActivity = (Activity) mContext;
+        //mActivity = (Activity) mContext;
         // Instantiate a Geofence requester
-        mGeofenceRequester = new GeofenceRequester(mActivity);
+        mGeofenceRequester = new GeofenceRequester(mContext);
         // Instantiate a Geofence remover
         mGeofenceRemover = new GeofenceRemover(mContext);
         mCurrentGeofences = new ArrayList<Geofence>();
