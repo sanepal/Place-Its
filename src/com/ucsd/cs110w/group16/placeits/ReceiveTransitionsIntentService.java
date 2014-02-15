@@ -4,10 +4,12 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
 
 import android.app.IntentService;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
@@ -42,8 +44,7 @@ public class ReceiveTransitionsIntentService extends IntentService {
     protected void onHandleIntent(Intent intent) {
 
         // Create a local broadcast Intent
-        Intent broadcastIntent = new Intent();
-        Log.d("placeits", "intent recieved");
+        Intent broadcastIntent = new Intent();        
 
         // Give it the category for all intents sent by the Intent Service
         broadcastIntent.addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES);
@@ -58,9 +59,7 @@ public class ReceiveTransitionsIntentService extends IntentService {
             String errorMessage = LocationServiceErrorMessages.getErrorString(this, errorCode);
 
             // Log the error
-            Log.e(GeofenceUtils.APPTAG,
-                    getString(R.string.geofence_transition_error_detail, errorMessage)
-            );
+            Log.e(GeofenceUtils.APPTAG, errorMessage);
 
             // Set the action and error message for the broadcast intent
             broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCE_ERROR)
@@ -81,15 +80,17 @@ public class ReceiveTransitionsIntentService extends IntentService {
                     ||
                     (transition == Geofence.GEOFENCE_TRANSITION_EXIT)
                ) {
+                String transitionType = getTransitionString(transition);
 
                 // Post a notification
                 List<Geofence> geofences = LocationClient.getTriggeringGeofences(intent);
                 String[] geofenceIds = new String[geofences.size()];
                 for (int index = 0; index < geofences.size() ; index++) {
                     geofenceIds[index] = geofences.get(index).getRequestId();
+                    //sendNotification(transitionType, geofenceIds[index]);
                 }
                 String ids = TextUtils.join(GeofenceUtils.GEOFENCE_ID_DELIMITER,geofenceIds);
-                String transitionType = getTransitionString(transition);
+                
 
                 sendNotification(transitionType, ids);
 
@@ -122,19 +123,31 @@ public class ReceiveTransitionsIntentService extends IntentService {
         // Create an explicit content Intent that starts the main Activity
         Intent notificationIntent =
                 new Intent(getApplicationContext(),MainActivity.class);
-
         // Construct a task stack
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-
         // Adds the main Activity to the task stack as the parent
         stackBuilder.addParentStack(MainActivity.class);
-
         // Push the content Intent onto the stack
         stackBuilder.addNextIntent(notificationIntent);
-
         // Get a PendingIntent containing the entire back stack
         PendingIntent notificationPendingIntent =
                 stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        
+        Intent dismissReceive = new Intent();  
+        dismissReceive.setAction("com.ucsd.cs110w.group16.placeits.dismiss");
+        Bundle dismissBundle = new Bundle();            
+        dismissBundle.putInt("PlaceItId",Integer.parseInt(ids));
+        dismissReceive.putExtras(dismissBundle);
+        PendingIntent pendingIntentDismiss = PendingIntent.getBroadcast(this, 0, dismissReceive, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        
+        Intent snoozeReceive = new Intent();  
+        snoozeReceive.setAction("com.ucsd.cs110w.group16.placeits.snooze");
+        Bundle snoozeBundle = new Bundle();            
+        snoozeBundle.putInt("PlaceItId",Integer.parseInt(ids));
+        dismissReceive.putExtras(snoozeBundle);
+        PendingIntent pendingIntentSnooze = PendingIntent.getBroadcast(this, 0, snoozeReceive, PendingIntent.FLAG_UPDATE_CURRENT);
+        
 
         // Get a notification builder that's compatible with platform versions >= 4
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
@@ -146,9 +159,9 @@ public class ReceiveTransitionsIntentService extends IntentService {
                .setContentTitle(activatedPlaceit.getTitle())
                .setContentText(activatedPlaceit.getDesc())
                .setContentIntent(notificationPendingIntent)
-               .addAction(R.drawable.ic_snooze, "Snooze", notificationPendingIntent)
-               .addAction(R.drawable.ic_dismiss, "Dismiss", notificationPendingIntent);
-
+               .addAction(R.drawable.ic_snooze, "Snooze", pendingIntentSnooze)
+               .addAction(R.drawable.ic_dismiss, "Dismiss", pendingIntentDismiss);
+        
         // Get an instance of the Notification manager
         NotificationManager mNotificationManager =
             (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

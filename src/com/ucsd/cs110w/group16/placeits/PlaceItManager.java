@@ -15,6 +15,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -83,62 +84,9 @@ public class PlaceItManager {
         }
     }
     
-    /**
-     * Called when the user clicks the "Remove geofences" button
-     *
-     * @param view The view that triggered this callback
-     */
-    public void onUnregisterByPendingIntentClicked(View view) {
-        /*
-         * Remove all geofences set by this app. To do this, get the
-         * PendingIntent that was added when the geofences were added
-         * and use it as an argument to removeGeofences(). The removal
-         * happens asynchronously; Location Services calls
-         * onRemoveGeofencesByPendingIntentResult() (implemented in
-         * the current Activity) when the removal is done
-         */
-
-        /*
-         * Record the removal as remove by Intent. If a connection error occurs,
-         * the app can automatically restart the removal if Google Play services
-         * can fix the error
-         */
-        // Record the type of removal
-        mRemoveType = GeofenceUtils.REMOVE_TYPE.INTENT;
-
-        /*
-         * Check for Google Play services. Do this after
-         * setting the request type. If connecting to Google Play services
-         * fails, onActivityResult is eventually called, and it needs to
-         * know what type of request was in progress.
-         */
-        if (!servicesConnected()) {
-
-            return;
-        }
-
-        // Try to make a removal request
-        try {
-        /*
-         * Remove the geofences represented by the currently-active PendingIntent. If the
-         * PendingIntent was removed for some reason, re-create it; since it's always
-         * created with FLAG_UPDATE_CURRENT, an identical PendingIntent is always created.
-         */
-        mGeofenceRemover.removeGeofencesByIntent(mGeofenceRequester.getRequestPendingIntent());
-
-        } catch (UnsupportedOperationException e) {
-            // Notify user that previous request hasn't finished.
-            Toast.makeText(mContext, R.string.remove_geofences_already_requested_error,
-                        Toast.LENGTH_LONG).show();
-        }
-
-    }
     
-    /**
-     * Called when the user clicks the "Remove geofence 2" button
-     * @param view The view that triggered this callback
-     */
-    public void onUnregisterGeofenceClicked(View view) {
+    
+    public void removePlaceItIntent(PlaceIt placeIt) {
         /*
          * Remove the geofence by creating a List of geofences to
          * remove and sending it to Location Services. The List
@@ -156,7 +104,7 @@ public class PlaceItManager {
         mRemoveType = GeofenceUtils.REMOVE_TYPE.LIST;
 
         // Create a List of 1 Geofence with the ID "2" and store it in the global list
-        mGeofenceIdsToRemove = Collections.singletonList("2");
+        mGeofenceIdsToRemove = Collections.singletonList(placeIt.getId());
 
         /*
          * Check for Google Play services. Do this after
@@ -302,6 +250,7 @@ public class PlaceItManager {
     	mDb.open();
     	mDb.updatePlaceIt(p);
     	mDb.close();
+    	removePlaceItIntent(p);
     }
     
     public void setActive(PlaceIt p)
@@ -318,5 +267,66 @@ public class PlaceItManager {
         mDb.open();
     	mDb.deletePlaceIt(p);
     	mDb.close();
+    }
+
+    public void handleActivityResult(int requestCode, int resultCode,
+            Intent intent) {
+     // Choose what to do based on the request code
+        switch (requestCode) {
+
+            // If the request code matches the code sent in onConnectionFailed
+            case GeofenceUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST :
+
+                switch (resultCode) {
+                    // If Google Play services resolved the problem
+                    case Activity.RESULT_OK:
+
+                        // If the request was to add geofences
+                        if (GeofenceUtils.REQUEST_TYPE.ADD == mRequestType) {
+
+                            // Toggle the request flag and send a new request
+                            mGeofenceRequester.setInProgressFlag(false);
+
+                            // Restart the process of adding the current geofences
+                            mGeofenceRequester.addGeofences(mCurrentGeofences);
+
+                        // If the request was to remove geofences
+                        } else if (GeofenceUtils.REQUEST_TYPE.REMOVE == mRequestType ){
+
+                            // Toggle the removal flag and send a new removal request
+                            mGeofenceRemover.setInProgressFlag(false);
+
+                            // If the removal was by Intent
+                            if (GeofenceUtils.REMOVE_TYPE.INTENT == mRemoveType) {
+
+                                // Restart the removal of all geofences for the PendingIntent
+                                mGeofenceRemover.removeGeofencesByIntent(
+                                    mGeofenceRequester.getRequestPendingIntent());
+
+                            // If the removal was by a List of geofence IDs
+                            } else {
+
+                                // Restart the removal of the geofence list
+                                mGeofenceRemover.removeGeofencesById(mGeofenceIdsToRemove);
+                            }
+                        }
+                    break;
+
+                    // If any other result was returned by Google Play services
+                    default:
+
+                        // Report that Google Play services was unable to resolve the problem.
+                        Log.d(GeofenceUtils.APPTAG, mContext.getString(R.string.no_resolution));
+                }
+
+            // If any other request code was received
+            default:
+               // Report that this Activity received an unknown requestCode
+               Log.d(GeofenceUtils.APPTAG,
+                       mContext.getString(R.string.unknown_activity_request_code, requestCode));
+
+               break;
+        }
+        
     }
 }

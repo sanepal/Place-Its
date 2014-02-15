@@ -70,6 +70,13 @@
             android:exported="false">
         </service>
         
+        <receiver android:name=".ReceiveNotificationEvents"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.ucsd.cs110w.group16.placeits.dismiss" />
+            </intent-filter>
+        </receiver>
+        
         <meta-data 
             android:name="android.app.default_searchable" 
             android:value="com.ucsd.cs110w.group16.placeits.MainActivity" />

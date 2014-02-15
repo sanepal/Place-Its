@@ -2,6 +2,8 @@ package com.ucsd.cs110w.group16.placeits;
 
 import java.util.List;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
@@ -21,6 +23,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -35,12 +38,13 @@ import android.widget.SearchView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity implements OnMapClickListener,
-        OnMarkerClickListener {
+        OnMarkerClickListener, OnConnectionFailedListener {
     private GoogleMap map;
     private Marker searchResult = null;
     private MenuItem searchItem;
     private CameraPositionStore mPrefs;
     private PlaceItManager placeItManager;
+    private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
     /*
      * An instance of an inner class that receives broadcasts from listeners and
@@ -90,15 +94,56 @@ public class MainActivity extends Activity implements OnMapClickListener,
         handleIntent(getIntent());
     }
 
+    /*
+     * Handle results returned to this Activity by other Activities started with
+     * startActivityForResult(). In particular, the method onConnectionFailed() in
+     * GeofenceRemover and GeofenceRequester may call startResolutionForResult() to
+     * start an Activity that handles Google Play services problems. The result of this
+     * call returns here, to onActivityResult.
+     * calls
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        
+        placeItManager.handleActivityResult(requestCode, resultCode, intent);        
+    }
+    
     private void setUpMapIfNeeded() {
         if (map == null) {
             map = ((MapFragment) getFragmentManager()
                     .findFragmentById(R.id.map)).getMap();
-
         }
-
     }
-
+    
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        /*
+         * Google Play services can resolve some errors it detects. If the error
+         * has a resolution, try sending an Intent to start a Google Play
+         * services activity that can resolve error.
+         */
+        if (connectionResult.hasResolution()) {
+            try {
+                // Start an Activity that tries to resolve the error
+                connectionResult.startResolutionForResult(this,
+                        CONNECTION_FAILURE_RESOLUTION_REQUEST);
+                /*
+                 * Thrown if Google Play services canceled the original
+                 * PendingIntent
+                 */
+            } catch (IntentSender.SendIntentException e) {
+                // Log the error
+                e.printStackTrace();
+            }
+        } else {
+            /*
+             * If no resolution is available, display a dialog to the user with
+             * the error.
+             */
+            Toast.makeText(this, "FAILURE!", Toast.LENGTH_LONG).show();
+        }
+    }
+    
     /*
      * (non-Javadoc)
      * 
@@ -144,7 +189,8 @@ public class MainActivity extends Activity implements OnMapClickListener,
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
             GetAddressResults loadplaces = new GetAddressResults(this);
-            searchItem.collapseActionView();
+            if(searchItem != null)
+                searchItem.collapseActionView();
             loadplaces.execute(query);
         }
     }
@@ -325,14 +371,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
         AlertDialog dialog = builder.create();
         dialog.show();
     }
-
-    protected void registerPlaceit(String title, String desc, LatLng location) {
-        Toast.makeText(getApplicationContext(),
-                "Place it created: " + title + " " + desc, Toast.LENGTH_LONG)
-                .show();
-        // TODO implement registerPlaceit
-        // register the place it
-    }
+    
 
     /*
      * Called when the "My Place It's" button is clicked, opens up activity to

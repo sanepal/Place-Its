@@ -13,12 +13,16 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -111,7 +115,11 @@ public class ListActivity extends FragmentActivity implements
     public void onTabReselected(ActionBar.Tab tab,
             FragmentTransaction fragmentTransaction) {
     }
-
+    
+    public void onDeleteClick(View v) {
+        Toast.makeText(this, "Delete Click "+ v.getId(), Toast.LENGTH_SHORT).show();
+    }
+    
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -172,12 +180,6 @@ public class ListActivity extends FragmentActivity implements
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main_dummy,
                     container, false);
-            /*
-             * TextView dummyTextView = (TextView) rootView
-             * .findViewById(R.id.section_label);
-             * dummyTextView.setText(Integer.toString(getArguments().getInt(
-             * ARG_SECTION_NUMBER)));
-             */
             List<PlaceIt> storedPlaceIts;
             if (getArguments().getInt(ARG_SECTION_NUMBER) == 1)
                 storedPlaceIts = placeItManager.getActivePlaceIts();
@@ -193,9 +195,6 @@ public class ListActivity extends FragmentActivity implements
                 strResult.append(result.getDesc());
                 arrResult[j] = strResult.toString();
             }
-            // Button mBtn = ((Button) inflater.inflate(R.layout.input_details,
-            // container,false).findViewById(R.id.btnList));
-            // mBtn.setText("Remove");
             if (getArguments().getInt(ARG_SECTION_NUMBER) == 1)
                 dummyListView.setAdapter(new ArrayAdapter<String>(getActivity(),
                     R.layout.list_repost, R.id.text, arrResult));
@@ -203,7 +202,8 @@ public class ListActivity extends FragmentActivity implements
                 dummyListView.setAdapter(new ArrayAdapter<String>(getActivity(),
                         R.layout.list_delete, R.id.text, arrResult));
             return rootView;
-        }
+        }        
+        
     }
 
 }
