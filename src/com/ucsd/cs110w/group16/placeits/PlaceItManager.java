@@ -47,14 +47,6 @@ public class PlaceItManager {
         mGeofenceRemover = new GeofenceRemover(mContext);
         mCurrentGeofences = new ArrayList<Geofence>();
         mDb = new PlaceItDatabase(mContext);
-        mDb.open();
-    }
-    
-    /**
-     * Close the database and do anything else that needs to be done on close.
-     */
-    void close() {
-    	mDb.close();
     }
     
     /**
@@ -221,28 +213,10 @@ public class PlaceItManager {
             return;
         }
 
-        /*
-         * Create a version of geofence 1 that is "flattened" into individual fields. This
-         * allows it to be stored in SharedPreferences.
-         */
-        /*
-         * Create an internal object to store the data. Set its
-         * ID to "1". This is a "flattened" object that contains
-         * a set of strings
-         */
-        //Integer id = 1;
+        //create the place it in our database
+        mDb.open();
         PlaceIt mPlaceIt = mDb.createPlaceIt(arg0.latitude, arg0.longitude, title, desc, true);
-        /*mUIGeofence1 = new SimpleGeofence(
-                "1",
-                (double) arg0.latitude,
-                (double) arg0.longitude,
-                (float) 1000.0,
-                Geofence.NEVER_EXPIRE,
-                // This geofence records only entry transitions
-                Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT);
-        // Store this flat version
-        mPrefs.setGeofence("1", mUIGeofence1);*/
-
+        mDb.close();
 
         /*
          * Add Geofence objects to a List. toGeofence()
@@ -299,35 +273,50 @@ public class PlaceItManager {
     
     public List<PlaceIt> getActivePlaceIts()
     {
-    	return mDb.getAllActive();
+        mDb.open();
+        List<PlaceIt> activePlaceIts = mDb.getAllActive();
+        mDb.close();
+    	return activePlaceIts;
     }
     
     public List<PlaceIt> getInActivePlaceIts()
     {
-    	return mDb.getAllInactive();
+        mDb.open();
+        List<PlaceIt> inactivePlaceIts = mDb.getAllInactive();
+        mDb.close();
+        return inactivePlaceIts;
     }
     
     
     public PlaceIt getPlaceIt(Long id)
     {
-    	return mDb.getPlaceIt(id);
+        mDb.open();
+        PlaceIt placeIt = mDb.getPlaceIt(id);
+        mDb.close();
+        return placeIt;
     }
     
     public void setInActive(PlaceIt p)
     {
     	p.setStatus(false);
+    	mDb.open();
     	mDb.updatePlaceIt(p);
+    	mDb.close();
     }
     
     public void setActive(PlaceIt p)
     {
     	p.setStatus(true);
+    	mDb.open();
     	mDb.updatePlaceIt(p);
+    	mDb.close();
     }
     
     public void removePlaceIt(PlaceIt p)
     {
     	// Do we need to remove from the geofence here?
+        mDb.open();
     	mDb.deletePlaceIt(p);
+    	mDb.close();
     }
 }
