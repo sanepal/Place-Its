@@ -47,15 +47,12 @@ public class MainActivity extends Activity implements OnMapClickListener,
     private MenuItem searchItem;
     private CameraPositionStore mPrefs;
     private PlaceItManager placeItManager;
-<<<<<<< HEAD
-    private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
-=======
+    private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     
     ArrayList<Integer> alarmCancelList;	// List to hold Id's of alarms to cancel.
     BroadcastReceiver alarmReceiver;	// Receiver to receive alarms.
     
->>>>>>> 80a571a
     /*
      * An instance of an inner class that receives broadcasts from listeners and
      * from the IntentService that receives geofence transition events
