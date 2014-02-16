@@ -5,6 +5,7 @@ import java.util.Locale;
 
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.location.Address;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -115,11 +116,7 @@ public class ListActivity extends FragmentActivity implements
     public void onTabReselected(ActionBar.Tab tab,
             FragmentTransaction fragmentTransaction) {
     }
-    
-    public void onDeleteClick(View v) {
-        Toast.makeText(this, "Delete Click "+ v.getId(), Toast.LENGTH_SHORT).show();
-    }
-    
+
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -180,7 +177,7 @@ public class ListActivity extends FragmentActivity implements
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main_dummy,
                     container, false);
-            List<PlaceIt> storedPlaceIts;
+            final List<PlaceIt> storedPlaceIts;
             if (getArguments().getInt(ARG_SECTION_NUMBER) == 1)
                 storedPlaceIts = placeItManager.getActivePlaceIts();
             else
@@ -195,15 +192,40 @@ public class ListActivity extends FragmentActivity implements
                 strResult.append(result.getDesc());
                 arrResult[j] = strResult.toString();
             }
-            if (getArguments().getInt(ARG_SECTION_NUMBER) == 1)
-                dummyListView.setAdapter(new ArrayAdapter<String>(getActivity(),
-                    R.layout.list_repost, R.id.text, arrResult));
-            else 
-                dummyListView.setAdapter(new ArrayAdapter<String>(getActivity(),
-                        R.layout.list_delete, R.id.text, arrResult));
-            return rootView;
-        }        
-        
-    }
+            if (getArguments().getInt(ARG_SECTION_NUMBER) == 1) {
+                ArrayAdapter<String> listOfActives = new ArrayAdapter<String>(
+                        getActivity(), R.layout.list_repost, R.id.text,
+                        arrResult);
+                dummyListView.setAdapter(listOfActives);
+                dummyListView.setOnItemClickListener(new OnItemClickListener() {
 
+                    @Override
+                    public void onItemClick(AdapterView<?> arg0, View arg1,
+                            int arg2, long arg3) {
+                       Log.d("list", "delete: "+arg2+arg3);
+                       placeItManager.setInActive(storedPlaceIts.get(arg2));  
+                    }
+                    
+                });
+            }
+            else {
+                dummyListView.setAdapter(new ArrayAdapter<String>(
+                        getActivity(), R.layout.list_delete, R.id.text,
+                        arrResult));
+                dummyListView.setOnItemClickListener(new OnItemClickListener() {
+
+                    @Override
+                    public void onItemClick(AdapterView<?> arg0, View arg1,
+                            int arg2, long arg3) {
+                       Log.d("list", "repost: "+arg2+arg3);
+                       placeItManager.registerPlaceIt(storedPlaceIts.get(arg2));  
+                    }
+                    
+                });
+            }
+            return rootView;
+        }             
+
+    }
+    
 }

@@ -12,11 +12,16 @@
         android:textAppearance="?android:attr/textAppearanceLargePopupMenu" >
     </TextView>
     
-    <Button 
-        android:id="@+id/btnRepost"
+    <TextView
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
+        android:paddingBottom="5dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingTop="5dp"
+        android:layout_centerVertical="true"
         android:text="Repost"
-        android:onClick="onRepostClick"/>
+        android:textAppearance="?android:attr/textAppearanceLargeInverse"
+        android:background="@drawable/textbg" />
 </RelativeLayout>

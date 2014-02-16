@@ -18,7 +18,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 
@@ -41,7 +40,6 @@ public class PlaceItManager {
 
     public PlaceItManager(Context mContext) {
         this.mContext = mContext;
-        //mActivity = (Activity) mContext;
         // Instantiate a Geofence requester
         mGeofenceRequester = new GeofenceRequester(mContext);
         // Instantiate a Geofence remover
@@ -131,8 +129,13 @@ public class PlaceItManager {
         }
     }
 	
+
+    public void registerPlaceIt(PlaceIt placeIt) {
+        registerPlaceIt(placeIt.getTitle(), placeIt.getDesc(), new LatLng(placeIt.getLatitude(), placeIt.getLongitude()));
+        
+    }
+    
     /**
-     * Called when the user clicks the "Register geofences" button.
      * Get the geofence parameters for each geofence and add them to
      * a List. Create the PendingIntent containing an Intent that
      * Location Services sends to this app's broadcast receiver when
@@ -329,4 +332,5 @@ public class PlaceItManager {
         }
         
     }
+
 }
