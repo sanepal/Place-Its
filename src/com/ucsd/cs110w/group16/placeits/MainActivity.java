@@ -1,5 +1,7 @@
 package com.ucsd.cs110w.group16.placeits;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -45,8 +47,15 @@ public class MainActivity extends Activity implements OnMapClickListener,
     private MenuItem searchItem;
     private CameraPositionStore mPrefs;
     private PlaceItManager placeItManager;
+<<<<<<< HEAD
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
+=======
+    
+    ArrayList<Integer> alarmCancelList;	// List to hold Id's of alarms to cancel.
+    BroadcastReceiver alarmReceiver;	// Receiver to receive alarms.
+    
+>>>>>>> 80a571a
     /*
      * An instance of an inner class that receives broadcasts from listeners and
      * from the IntentService that receives geofence transition events
@@ -94,6 +103,33 @@ public class MainActivity extends Activity implements OnMapClickListener,
         map.setOnMapClickListener(this);
         map.setOnMarkerClickListener(this);
         handleIntent(getIntent());
+        
+        /**
+         * BroadcastReceiver to receive alarms and determine what to do when an alarm is received
+         * Add what should be done when the alarm is received in here.
+         */
+        alarmReceiver = new BroadcastReceiver() {
+            @Override
+			public void onReceive(Context c, Intent i) {
+            	boolean flag = true;
+            	int alarmToCancel = i.getIntExtra("com.ucsd.cs110w.group16.placeits.Id",0);	//Gets the ID from the intent
+            	Iterator<Integer> myIterator = alarmCancelList.iterator();
+            	while(myIterator.hasNext())						//Goes through list to see if ID from
+            	{												//intent received matches any of the Integers
+            		Integer IntCancel = myIterator.next();		//in the alarms to cancel list
+            		if( (int) IntCancel == alarmToCancel)
+            		{
+            			flag = false;							//cancel this alarm.
+            		}
+            	}
+            	if (flag)
+            	{	
+            		/* Put command to trigger when alarm goes off here */
+            	}
+			}
+
+        };
+        registerReceiver(alarmReceiver, new IntentFilter("com.ucsd.cs110w.group16.placeits") );
     }
 
     private void displayActivePlaceIts() {
@@ -155,6 +191,39 @@ public class MainActivity extends Activity implements OnMapClickListener,
             Toast.makeText(this, "FAILURE!", Toast.LENGTH_LONG).show();
         }
     }
+    
+    /**
+     * Calls the activity to set up a scheduling alarm, which is the weekly alarm. Sets the PlaceIt
+     * at 11:59:59 PM the day before the PlaceIt should appear.
+     * @param Id the Id of the place it to set a schedule for.
+     */
+    public void setupSchedulingAlarm(Integer Id)
+    {
+    	Intent alarmActivity = new Intent(this, SchedulingAlarmActivity.class);
+		alarmActivity.putExtra("com.ucsd.cs110w.group16.placeits.Id",Id);
+		startActivity(alarmActivity);
+    }
+    
+    /**
+     * Calls the activity to set up a repost alarm, which has 4 options: 1 day, 2 days, 1 week, 2 weeks.
+     * @param Id the Id of the place it to repost.
+     */
+    public void setupRepostAlarm(Integer Id)
+    {
+    	Intent alarmActivity = new Intent(this, RepostAlarmActivity.class);
+		alarmActivity.putExtra("com.ucsd.cs110w.group16.placeits.Id",Id);
+		startActivity(alarmActivity);
+    }
+    
+    /**
+     * Adds the id to cancel to the list of alarms to cancel, so that when the broadcast with that Id
+     * is received, it will ignore it.
+     * @param Id the Id of the alarm to cancel.
+     */
+    public void cancelAlarm(Integer Id)
+	{
+		alarmCancelList.add(Id);
+	}
     
     /*
      * (non-Javadoc)
@@ -489,5 +558,9 @@ public class MainActivity extends Activity implements OnMapClickListener,
             Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
         }
     }
+    
+    /**
+     * Sets up an alarm for scheduling weekly events
+     */
 
 }

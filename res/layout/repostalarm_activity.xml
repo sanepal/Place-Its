@@ -1,0 +1,41 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:layout_gravity="center" 
+    android:gravity="center">
+    
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Reposting options" />
+    
+    <Button 
+        android:id="@+id/one_day"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1 day"
+        android:onClick="one_day"/>
+
+    <Button 
+        android:id="@+id/two_days"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2 days"
+        android:onClick="two_days"/>
+    
+    <Button 
+        android:id="@+id/one_week"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1 week"
+        android:onClick="one_week"/>
+    
+    <Button 
+        android:id="@+id/two_weeks"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2 weeks"
+        android:onClick="two_weeks"/>
+    
+</LinearLayout>
