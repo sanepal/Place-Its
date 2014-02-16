@@ -165,9 +165,7 @@ public class PlaceItManager {
         }
 
         //create the place it in our database
-        mDb.open();
         PlaceIt mPlaceIt = mDb.createPlaceIt(arg0.latitude, arg0.longitude, title, desc, true);
-        mDb.close();
 
         /*
          * Add Geofence objects to a List. toGeofence()
@@ -225,52 +223,40 @@ public class PlaceItManager {
     
     public List<PlaceIt> getActivePlaceIts()
     {
-        mDb.open();
         List<PlaceIt> activePlaceIts = mDb.getAllActive();
-        mDb.close();
     	return activePlaceIts;
     }
     
     public List<PlaceIt> getInActivePlaceIts()
     {
-        mDb.open();
         List<PlaceIt> inactivePlaceIts = mDb.getAllInactive();
-        mDb.close();
         return inactivePlaceIts;
     }
     
     
     public PlaceIt getPlaceIt(Long id)
     {
-        mDb.open();
         PlaceIt placeIt = mDb.getPlaceIt(id);
-        mDb.close();
         return placeIt;
     }
     
     public void setInActive(PlaceIt p)
     {
     	p.setStatus(false);
-    	mDb.open();
     	mDb.updatePlaceIt(p);
-    	mDb.close();
     	removePlaceItIntent(p);
     }
     
     public void setActive(PlaceIt p)
     {
     	p.setStatus(true);
-    	mDb.open();
     	mDb.updatePlaceIt(p);
-    	mDb.close();
     }
     
     public void removePlaceIt(PlaceIt p)
     {
     	// Do we need to remove from the geofence here?
-        mDb.open();
     	mDb.deletePlaceIt(p);
-    	mDb.close();
     }
 
     public void handleActivityResult(int requestCode, int resultCode,

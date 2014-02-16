@@ -36,6 +36,9 @@ public class PlaceItDatabase {
 		values.put(PlaceItDatabaseHelper.COLUMN_DESCRIPTION, description);
 		values.put(PlaceItDatabaseHelper.COLUMN_STATUS, active);
 		
+		// Open the database
+		open();
+		
 		// Insert values into database and get the ID.
 		Integer insertID = (int) database.insert(PlaceItDatabaseHelper.TABLE_NAME, null, values);
 		
@@ -48,6 +51,9 @@ public class PlaceItDatabase {
 		cursor.moveToFirst();
 		PlaceIt placeIt = cursorToPlaceIt(cursor);
 		cursor.close();
+		
+		// Close the database - should be in activity's onDelete instead?
+		close();
 		
 		return placeIt;
 	}
@@ -63,17 +69,24 @@ public class PlaceItDatabase {
 		values.put(PlaceItDatabaseHelper.COLUMN_STATUS, placeIt.isActive());
 		
 		// Update the values in the database.
+		open();
 		database.replace(PlaceItDatabaseHelper.TABLE_NAME, null, values);
+		close(); // should be in activity's onDelete instead?
 	}
 	
 	public void deletePlaceIt(PlaceIt placeIt) {
 		Integer id = placeIt.getIntId();
 		
 		// Delete the object with matching ID from the database.
+		open();
 		database.delete(PlaceItDatabaseHelper.TABLE_NAME, PlaceItDatabaseHelper.COLUMN_ID + " = " + id, null);
+		close(); // should be in activity's onDelete instead?
 	}
 	
 	public PlaceIt getPlaceIt(Long id) {
+		// Open the database
+		open();
+		
 		// Retrieve the object with matching ID from the database.
 		Cursor cursor = database.query(PlaceItDatabaseHelper.TABLE_NAME, PlaceItDatabaseHelper.ALL_COLUMNS,
 				PlaceItDatabaseHelper.COLUMN_ID + "=" + id, null, null, null, null);
@@ -81,6 +94,8 @@ public class PlaceItDatabase {
 		cursor.moveToFirst();
 		PlaceIt placeIt = cursorToPlaceIt(cursor);
 		cursor.close();
+
+		close(); // should be in activity's onDelete instead?
 		
 		return placeIt;
 	}
@@ -96,6 +111,9 @@ public class PlaceItDatabase {
 	private List<PlaceIt> getAllWithStatus(boolean status) {
 		List<PlaceIt> placeIts = new ArrayList<PlaceIt>();
 		
+		// Open the database
+		open();
+		
 		// Return all rows with matching status value.
 		int value = status ? 1 : 0;
 		Cursor cursor = database.query(PlaceItDatabaseHelper.TABLE_NAME, PlaceItDatabaseHelper.ALL_COLUMNS,
@@ -108,6 +126,8 @@ public class PlaceItDatabase {
 			cursor.moveToNext();
 		}
 		cursor.close();
+
+		close(); // should be in activity's onDelete instead?
 		
 		return placeIts;
 	}
