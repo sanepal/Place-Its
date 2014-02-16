@@ -376,7 +376,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
                                 .snippet(inputDesc.getText().toString()));
                         // TODO get values from dropdown boxes
                         // TODO check inputs for empty values
-                        placeItManager.registerPlaceIt(inputTitle.getText()
+                        placeItManager.createPlaceIt(inputTitle.getText()
                                 .toString(), inputDesc.getText().toString(),
                                 location);
                     }

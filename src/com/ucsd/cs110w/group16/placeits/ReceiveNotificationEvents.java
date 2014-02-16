@@ -1,5 +1,7 @@
 package com.ucsd.cs110w.group16.placeits;
 
+import java.util.List;
+
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -16,6 +18,14 @@ public class ReceiveNotificationEvents extends BroadcastReceiver {
             Log.d("broadcast", "snooze");
             //TODO implement snooze
         }
+        
+        else if(action.equals(Intent.ACTION_BOOT_COMPLETED)) {
+            List<PlaceIt> activePlaceIts = placeItManager.getActivePlaceIts();
+            for(PlaceIt placeIt:activePlaceIts) {
+                placeItManager.registerGeofence(placeIt);
+            }
+        }
+           
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         manager.cancel(0);
     }

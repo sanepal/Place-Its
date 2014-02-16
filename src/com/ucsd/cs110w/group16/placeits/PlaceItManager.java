@@ -130,8 +130,18 @@ public class PlaceItManager {
     }
 	
 
-    public void registerPlaceIt(PlaceIt placeIt) {
-        registerPlaceIt(placeIt.getTitle(), placeIt.getDesc(), new LatLng(placeIt.getLatitude(), placeIt.getLongitude()));
+    public void createPlaceIt(PlaceIt placeIt) {
+        createPlaceIt(placeIt.getTitle(), placeIt.getDesc(), new LatLng(placeIt.getLatitude(), placeIt.getLongitude()));
+        
+    }
+    
+    
+    public void createPlaceIt(String title, String desc, LatLng arg0) {        
+
+        //create the place it in our database
+        PlaceIt mPlaceIt = mDb.createPlaceIt(arg0.latitude, arg0.longitude, title, desc, true);
+        registerGeofence(mPlaceIt);
+
         
     }
     
@@ -144,8 +154,7 @@ public class PlaceItManager {
      * @param desc 
      * @param title 
      */
-    public void registerPlaceIt(String title, String desc, LatLng arg0) {
-
+    public void registerGeofence(PlaceIt mPlaceIt) {
         /*
          * Record the request as an ADD. If a connection error occurs,
          * the app can automatically restart the add request if Google Play services
@@ -163,17 +172,12 @@ public class PlaceItManager {
 
             return;
         }
-
-        //create the place it in our database
-        PlaceIt mPlaceIt = mDb.createPlaceIt(arg0.latitude, arg0.longitude, title, desc, true);
-
         /*
-         * Add Geofence objects to a List. toGeofence()
+         * Add PlaceIt objects to a List. toGeofence()
          * creates a Location Services Geofence object from a
          * flat object
          */
         mCurrentGeofences.add(mPlaceIt.toGeofence());
-
         // Start the request. Fail if there's already a request in progress
         try {
             // Try to add geofences
