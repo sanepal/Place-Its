@@ -40,7 +40,7 @@ public class RepostAlarmActivity extends Activity implements OnClickListener{
 	private void setup() {
 		
 		Intent myInt = getIntent();
-		int i = myInt.getIntExtra("myId",0);
+		int i = myInt.getIntExtra("com.ucsd.cs110w.group16.placeits.Id",0);
         pi = PendingIntent.getBroadcast( this, i, new Intent("com.ucsd.cs110w.group16.placeits"), 0 );
         am = (AlarmManager)(this.getSystemService( Context.ALARM_SERVICE ));
     

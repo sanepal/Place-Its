@@ -97,7 +97,7 @@ public class MainActivity extends Activity implements OnMapClickListener, OnMark
             @Override
 			public void onReceive(Context c, Intent i) {
             	boolean flag = true;
-            	int alarmToCancel = i.getIntExtra("myId",0);	//Gets the ID from the intent
+            	int alarmToCancel = i.getIntExtra("com.ucsd.cs110w.group16.placeits.Id",0);	//Gets the ID from the intent
             	Iterator<Integer> myIterator = alarmCancelList.iterator();
             	while(myIterator.hasNext())						//Goes through list to see if ID from
             	{												//intent received matches any of the Integers
