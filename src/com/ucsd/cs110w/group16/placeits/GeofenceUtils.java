@@ -30,7 +30,7 @@ public final class GeofenceUtils {
     /*
      * A log tag for the application
      */
-    public static final String APPTAG = "Geofence Detection";
+    public static final String APPTAG = "Place It's";
 
     // Intent actions
     public static final String ACTION_CONNECTION_ERROR =

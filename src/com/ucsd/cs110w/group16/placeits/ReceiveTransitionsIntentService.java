@@ -124,6 +124,12 @@ public class ReceiveTransitionsIntentService extends IntentService {
         // Create an explicit content Intent that starts the main Activity
         Intent notificationIntent =
                 new Intent(getApplicationContext(),MainActivity.class);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        //set intent action and add the place it id to the intent so that our mainactivity can react
+        notificationIntent.setAction("com.ucsd.cs110w.group16.placeits.launchAppWithPlaceIt");
+        Bundle notificationBundle = new Bundle();
+        notificationBundle.putInt("PlaceItId", Integer.parseInt(ids));
+        notificationIntent.putExtras(notificationBundle);
         // Construct a task stack
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         // Adds the main Activity to the task stack as the parent
@@ -134,6 +140,7 @@ public class ReceiveTransitionsIntentService extends IntentService {
         PendingIntent notificationPendingIntent =
                 stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
         
+        //two intents for dismiss and snooze function receivers
         Intent dismissReceive = new Intent();  
         dismissReceive.setAction("com.ucsd.cs110w.group16.placeits.dismiss");
         Bundle dismissBundle = new Bundle();            
@@ -163,7 +170,8 @@ public class ReceiveTransitionsIntentService extends IntentService {
                .setContentIntent(notificationPendingIntent)
                .addAction(R.drawable.ic_snooze, "Snooze", pendingIntentSnooze)
                .addAction(R.drawable.ic_dismiss, "Dismiss", pendingIntentDismiss)
-               .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+               .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+               .setAutoCancel(true);
         
         // Get an instance of the Notification manager
         NotificationManager mNotificationManager =

@@ -9,6 +9,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -167,7 +168,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 mBroadcastReceiver, mIntentFilter);
         map.animateCamera(CameraUpdateFactory.newCameraPosition(mPrefs
-                .getCameraPosition()));
+                .getCameraPosition()), 18, null);
     }
 
     /*
@@ -203,6 +204,14 @@ public class MainActivity extends Activity implements OnMapClickListener,
             if(searchItem != null)
                 searchItem.collapseActionView();
             loadplaces.execute(query);
+        }
+        else if(intent.getAction().equals("com.ucsd.cs110w.group16.placeits.launchAppWithPlaceIt")) {
+            PlaceIt placeIt = placeItManager.getPlaceIt((long) intent.getExtras().getInt("PlaceItId"));
+            Marker marker = map.addMarker(new MarkerOptions().position(new LatLng(placeIt.getLatitude(), placeIt.getLongitude()))
+                    .title(placeIt.getTitle())
+                    .snippet(placeIt.getDesc()));
+            map.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(marker.getPosition(), 5, 0, 0)), 5 , null);
+            marker.showInfoWindow();
         }
     }
 

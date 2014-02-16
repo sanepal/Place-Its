@@ -74,6 +74,7 @@
             android:exported="false" >
             <intent-filter>
                 <action android:name="com.ucsd.cs110w.group16.placeits.dismiss" />
+                <action android:name="com.ucsd.cs110w.group16.placeits.snooze" />
             </intent-filter>
         </receiver>
         
