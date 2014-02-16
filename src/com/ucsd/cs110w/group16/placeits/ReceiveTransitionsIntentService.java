@@ -9,6 +9,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
@@ -87,12 +88,12 @@ public class ReceiveTransitionsIntentService extends IntentService {
                 String[] geofenceIds = new String[geofences.size()];
                 for (int index = 0; index < geofences.size() ; index++) {
                     geofenceIds[index] = geofences.get(index).getRequestId();
-                    //sendNotification(transitionType, geofenceIds[index]);
+                    sendNotification(transitionType, geofenceIds[index]);
                 }
                 String ids = TextUtils.join(GeofenceUtils.GEOFENCE_ID_DELIMITER,geofenceIds);
                 
 
-                sendNotification(transitionType, ids);
+                //sendNotification(transitionType, ids);
 
                 // Log the transition type and a message
                 Log.d(GeofenceUtils.APPTAG,
@@ -154,18 +155,19 @@ public class ReceiveTransitionsIntentService extends IntentService {
         
         placeItManager = new PlaceItManager(getApplicationContext());
         PlaceIt activatedPlaceit = placeItManager.getPlaceIt((long) Integer.parseInt(ids));
+        placeItManager.setInActive(activatedPlaceit);
         // Set the notification contents
         builder.setSmallIcon(R.drawable.ic_notification)
                .setContentTitle(activatedPlaceit.getTitle())
                .setContentText(activatedPlaceit.getDesc())
                .setContentIntent(notificationPendingIntent)
                .addAction(R.drawable.ic_snooze, "Snooze", pendingIntentSnooze)
-               .addAction(R.drawable.ic_dismiss, "Dismiss", pendingIntentDismiss);
+               .addAction(R.drawable.ic_dismiss, "Dismiss", pendingIntentDismiss)
+               .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
         
         // Get an instance of the Notification manager
         NotificationManager mNotificationManager =
             (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        
         // Issue the notification
         mNotificationManager.notify(0, builder.build());
     }

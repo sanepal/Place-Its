@@ -180,6 +180,7 @@ public class PlaceItManager {
         try {
             // Try to add geofences
             mGeofenceRequester.addGeofences(mCurrentGeofences);
+            mCurrentGeofences.remove(mPlaceIt);
         } catch (UnsupportedOperationException e) {
             // Notify user that previous request hasn't finished.
             Toast.makeText(mContext, R.string.add_geofences_already_requested_error,
