@@ -88,10 +88,21 @@ public class MainActivity extends Activity implements OnMapClickListener,
         mPrefs = new CameraPositionStore(this);
         placeItManager = new PlaceItManager(this);
         setUpMapIfNeeded();
+        displayActivePlaceIts();
         map.setMyLocationEnabled(true);
         map.setOnMapClickListener(this);
         map.setOnMarkerClickListener(this);
         handleIntent(getIntent());
+    }
+
+    private void displayActivePlaceIts() {
+        List<PlaceIt> activePlaceIts = placeItManager.getActivePlaceIts();
+        for( PlaceIt placeIt : activePlaceIts) {
+            map.addMarker(new MarkerOptions().position(new LatLng(placeIt.getLatitude(), placeIt.getLongitude()))
+                    .title(placeIt.getTitle())
+                    .snippet(placeIt.getDesc()));
+        }
+        
     }
 
     /*
