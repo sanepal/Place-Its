@@ -1,6 +1,5 @@
 package com.ucsd.cs110w.group16.placeits;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -18,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -161,21 +161,21 @@ public class ListActivity extends FragmentActivity implements
          */
         public static final String ARG_SECTION_NUMBER = "section_number";
 
-        List<String> listActive;
-        List<String> listInActive;
+        //List<String> listActive;
+        //List<String> listInActive;
         List<PlaceIt> activePlaceIts;
         List<PlaceIt> inActivePlaceIts;
 
         public DummySectionFragment() {
-            listActive = new ArrayList<String>();
-            listInActive = new ArrayList<String>();
+            //listActive = new ArrayList<String>();
+            //listInActive = new ArrayList<String>();
         }
 
         private void generateDataSet() {
             activePlaceIts = placeItManager.getActivePlaceIts();
 
             inActivePlaceIts = placeItManager.getInActivePlaceIts();
-            listActive.clear();
+            /*listActive.clear();
             
             for (int j = 0; j < activePlaceIts.size(); j++) {
                 PlaceIt result = activePlaceIts.get(j);
@@ -191,7 +191,7 @@ public class ListActivity extends FragmentActivity implements
                 strResult.append(result.getTitle()).append("\n");
                 strResult.append(result.getDesc());
                 listInActive.add(strResult.toString());
-            }
+            }*/
         }
 
         @Override
@@ -202,11 +202,15 @@ public class ListActivity extends FragmentActivity implements
             generateDataSet();
             ListView dummyListView = (ListView) rootView
                     .findViewById(R.id.section_label);
-            final ArrayAdapter<String> listOfActives = new ArrayAdapter<String>(
+            /*final ArrayAdapter<String> listOfActives = new ArrayAdapter<String>(
                     getActivity(), R.layout.list_repost, R.id.text, listActive);
             final ArrayAdapter<String> listOfInActives = new ArrayAdapter<String>(
                     getActivity(), R.layout.list_delete, R.id.text,
-                    listInActive);
+                    listInActive);*/
+            final ArrayAdapter<PlaceIt> listOfActives = new ArrayAdapter<PlaceIt>(
+                    getActivity(), R.layout.list_repost, R.id.text, activePlaceIts);
+            final ArrayAdapter<PlaceIt> listOfInActives = new ArrayAdapter<PlaceIt>(
+                    getActivity(), R.layout.list_delete, R.id.text, inActivePlaceIts);
             if (getArguments().getInt(ARG_SECTION_NUMBER) == 1) {
 
                 dummyListView.setAdapter(listOfActives);
@@ -260,6 +264,15 @@ public class ListActivity extends FragmentActivity implements
                                 .show();
                     }
 
+                });
+                dummyListView.setOnItemLongClickListener(new OnItemLongClickListener() {
+                	public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
+                			int pos, long id) {
+                		
+                		Toast.makeText(getActivity(), "Long Click", Toast.LENGTH_SHORT).show();
+                		
+                		return true;
+                	}
                 });
             }
             return rootView;

@@ -244,4 +244,9 @@ public class PlaceIt {
                        .setExpirationDuration(mExpirationDuration)
                        .build();
     }
+    
+    @Override
+    public String toString() {
+    	return title + "\n" + desc;
+    }
 }
