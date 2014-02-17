@@ -219,14 +219,17 @@ public class ListActivity extends FragmentActivity implements
                     @Override
                     public void onItemClick(AdapterView<?> arg0,
                             final View arg1, int arg2, long arg3) {
-                        placeItManager.setInActive(activePlaceIts.get(arg2));
+                    	PlaceIt removedPlaceIt = activePlaceIts.get(arg2);
+                        placeItManager.setInActive(removedPlaceIt);
+                    	activePlaceIts.remove(removedPlaceIt);
+                    	inActivePlaceIts.add(removedPlaceIt);
                         arg1.animate().setDuration(5).alpha(0)
                                 .withEndAction(new Runnable() {
                                     @Override
                                     public void run() {
-                                        listOfActives.clear();
-                                        listOfInActives.clear();
-                                        generateDataSet();
+                                        //listOfActives.clear();
+                                        //listOfInActives.clear();
+                                        //generateDataSet();
                                         listOfInActives.notifyDataSetChanged();
                                         listOfActives.notifyDataSetChanged();
                                         arg1.setAlpha(1);
@@ -245,31 +248,46 @@ public class ListActivity extends FragmentActivity implements
                     @Override
                     public void onItemClick(AdapterView<?> arg0,
                             final View arg1, int arg2, long arg3) {
+                    	PlaceIt repostedPlaceIt = inActivePlaceIts.get(arg2);
                         placeItManager.registerGeofence(placeItManager
-                                .createPlaceIt(inActivePlaceIts.get(arg2)));
+                                .createPlaceIt(repostedPlaceIt));
+                        activePlaceIts.add(repostedPlaceIt);
+                        inActivePlaceIts.remove(repostedPlaceIt);
                         arg1.animate().setDuration(5).alpha(0)
                                 .withEndAction(new Runnable() {
                                     @Override
                                     public void run() {
-                                        listOfActives.clear();
-                                        listOfInActives.clear();
-                                        generateDataSet();
+                                        //listOfActives.clear();
+                                        //listOfInActives.clear();
+                                        //generateDataSet();
                                         listOfInActives.notifyDataSetChanged();
                                         listOfActives.notifyDataSetChanged();
                                         arg1.setAlpha(1);
                                     }
                                 });
                         Toast.makeText(getActivity(),
-                                "Place It has been added", Toast.LENGTH_SHORT)
+                                "Place It has been reposted", Toast.LENGTH_SHORT)
                                 .show();
                     }
 
                 });
                 dummyListView.setOnItemLongClickListener(new OnItemLongClickListener() {
-                	public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
+                	public boolean onItemLongClick(AdapterView<?> arg0, final View arg1,
                 			int pos, long id) {
                 		
-                		Toast.makeText(getActivity(), "Long Click", Toast.LENGTH_SHORT).show();
+                		PlaceIt deletedPlaceIt = inActivePlaceIts.get(pos);
+                		placeItManager.removePlaceIt(deletedPlaceIt);
+                        inActivePlaceIts.remove(deletedPlaceIt);
+                        arg1.animate().setDuration(5).alpha(0)
+                                .withEndAction(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        listOfInActives.notifyDataSetChanged();
+                                        arg1.setAlpha(1);
+                                    }
+                                });
+                		
+                		Toast.makeText(getActivity(), "Place It has been deleted", Toast.LENGTH_SHORT).show();
                 		
                 		return true;
                 	}
