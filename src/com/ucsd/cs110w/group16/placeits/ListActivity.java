@@ -43,6 +43,8 @@ public class ListActivity extends FragmentActivity implements
     private static PlaceItManager placeItManager;
     private static List<PlaceIt> activePlaceIts;
     private static List<PlaceIt> inActivePlaceIts;
+    private static ArrayAdapter<PlaceIt> listOfActives;
+    private static ArrayAdapter<PlaceIt> listOfInActives;
     
 
     @Override
@@ -87,6 +89,8 @@ public class ListActivity extends FragmentActivity implements
         placeItManager = new PlaceItManager(this);
         activePlaceIts = placeItManager.getActivePlaceIts();
         inActivePlaceIts = placeItManager.getInActivePlaceIts();
+        listOfActives = new ArrayAdapter<PlaceIt>(this, R.layout.list_repost, R.id.text, activePlaceIts);
+        listOfInActives = new ArrayAdapter<PlaceIt>(this, R.layout.list_delete, R.id.text, inActivePlaceIts);
     }
 
     @Override
@@ -182,14 +186,14 @@ public class ListActivity extends FragmentActivity implements
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main_dummy,
                     container, false);
-            generateDataSet();
+            //generateDataSet();
             
             ListView dummyListView = (ListView) rootView
                     .findViewById(R.id.section_label);
-            final ArrayAdapter<PlaceIt> listOfActives = new ArrayAdapter<PlaceIt>(
+            /*final ArrayAdapter<PlaceIt> listOfActives = new ArrayAdapter<PlaceIt>(
                     getActivity(), R.layout.list_repost, R.id.text, activePlaceIts);
             final ArrayAdapter<PlaceIt> listOfInActives = new ArrayAdapter<PlaceIt>(
-                    getActivity(), R.layout.list_delete, R.id.text, inActivePlaceIts);
+                    getActivity(), R.layout.list_delete, R.id.text, inActivePlaceIts);*/
             if (getArguments().getInt(ARG_SECTION_NUMBER) == 1) {
 
                 dummyListView.setAdapter(listOfActives);
@@ -225,8 +229,8 @@ public class ListActivity extends FragmentActivity implements
                     public void onItemClick(AdapterView<?> arg0,
                             final View arg1, int arg2, long arg3) {
                     	PlaceIt repostedPlaceIt = inActivePlaceIts.get(arg2);
-                        placeItManager.registerGeofence(placeItManager
-                                .createPlaceIt(repostedPlaceIt));
+                    	placeItManager.setActive(repostedPlaceIt);
+                        placeItManager.registerGeofence(repostedPlaceIt);
                         activePlaceIts.add(repostedPlaceIt);
                         inActivePlaceIts.remove(repostedPlaceIt);
                         arg1.animate().setDuration(5).alpha(0)
