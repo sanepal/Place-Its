@@ -41,6 +41,9 @@ public class ListActivity extends FragmentActivity implements
     ViewPager mViewPager;
 
     private static PlaceItManager placeItManager;
+    private static List<PlaceIt> activePlaceIts;
+    private static List<PlaceIt> inActivePlaceIts;
+    
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +85,8 @@ public class ListActivity extends FragmentActivity implements
                     .setTabListener(this));
         }
         placeItManager = new PlaceItManager(this);
+        activePlaceIts = placeItManager.getActivePlaceIts();
+        inActivePlaceIts = placeItManager.getInActivePlaceIts();
     }
 
     @Override
@@ -161,37 +166,15 @@ public class ListActivity extends FragmentActivity implements
          */
         public static final String ARG_SECTION_NUMBER = "section_number";
 
-        //List<String> listActive;
-        //List<String> listInActive;
-        List<PlaceIt> activePlaceIts;
-        List<PlaceIt> inActivePlaceIts;
+        /*List<PlaceIt> activePlaceIts;
+        List<PlaceIt> inActivePlaceIts;*/
 
         public DummySectionFragment() {
-            //listActive = new ArrayList<String>();
-            //listInActive = new ArrayList<String>();
         }
 
         private void generateDataSet() {
-            activePlaceIts = placeItManager.getActivePlaceIts();
-
-            inActivePlaceIts = placeItManager.getInActivePlaceIts();
-            /*listActive.clear();
-            
-            for (int j = 0; j < activePlaceIts.size(); j++) {
-                PlaceIt result = activePlaceIts.get(j);
-                StringBuilder strResult = new StringBuilder();
-                strResult.append(result.getTitle()).append("\n");
-                strResult.append(result.getDesc());
-                listActive.add(strResult.toString());
-            }
-            listInActive.clear();
-            for (int j = 0; j < inActivePlaceIts.size(); j++) {
-                PlaceIt result = inActivePlaceIts.get(j);
-                StringBuilder strResult = new StringBuilder();
-                strResult.append(result.getTitle()).append("\n");
-                strResult.append(result.getDesc());
-                listInActive.add(strResult.toString());
-            }*/
+            /*activePlaceIts = placeItManager.getActivePlaceIts();
+            inactivePlaceIts = placeItManager.getInActivePlaceIts();*/
         }
 
         @Override
@@ -200,13 +183,9 @@ public class ListActivity extends FragmentActivity implements
             View rootView = inflater.inflate(R.layout.fragment_main_dummy,
                     container, false);
             generateDataSet();
+            
             ListView dummyListView = (ListView) rootView
                     .findViewById(R.id.section_label);
-            /*final ArrayAdapter<String> listOfActives = new ArrayAdapter<String>(
-                    getActivity(), R.layout.list_repost, R.id.text, listActive);
-            final ArrayAdapter<String> listOfInActives = new ArrayAdapter<String>(
-                    getActivity(), R.layout.list_delete, R.id.text,
-                    listInActive);*/
             final ArrayAdapter<PlaceIt> listOfActives = new ArrayAdapter<PlaceIt>(
                     getActivity(), R.layout.list_repost, R.id.text, activePlaceIts);
             final ArrayAdapter<PlaceIt> listOfInActives = new ArrayAdapter<PlaceIt>(
@@ -227,9 +206,6 @@ public class ListActivity extends FragmentActivity implements
                                 .withEndAction(new Runnable() {
                                     @Override
                                     public void run() {
-                                        //listOfActives.clear();
-                                        //listOfInActives.clear();
-                                        //generateDataSet();
                                         listOfInActives.notifyDataSetChanged();
                                         listOfActives.notifyDataSetChanged();
                                         arg1.setAlpha(1);
@@ -257,9 +233,6 @@ public class ListActivity extends FragmentActivity implements
                                 .withEndAction(new Runnable() {
                                     @Override
                                     public void run() {
-                                        //listOfActives.clear();
-                                        //listOfInActives.clear();
-                                        //generateDataSet();
                                         listOfInActives.notifyDataSetChanged();
                                         listOfActives.notifyDataSetChanged();
                                         arg1.setAlpha(1);
