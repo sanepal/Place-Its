@@ -13,10 +13,12 @@ public class ReceiveNotificationEvents extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         PlaceItManager placeItManager = new PlaceItManager(context);
         String action = intent.getAction();
-
+        //int id = intent.getExtras().getInt("PlaceItId");
         if (action.equals("com.ucsd.cs110w.group16.placeits.snooze")) {
             Log.d("broadcast", "snooze");
-            //TODO implement snooze
+            /*Intent alarmActivity = new Intent(context, RepostAlarmActivity.class);
+            alarmActivity.putExtra("com.ucsd.cs110w.group16.placeits.Id",id);
+            context.startActivity(alarmActivity);*/
         }
         
         else if(action.equals(Intent.ACTION_BOOT_COMPLETED)) {

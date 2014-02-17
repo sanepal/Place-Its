@@ -26,7 +26,7 @@
         android:layout_below="@+id/input_title"
         android:ems="10"
         android:hint="@string/input_desc" />
-
+    <!--  
     <Spinner
         android:id="@+id/spinner1"
         android:layout_width="wrap_content"
@@ -55,5 +55,6 @@
         android:layout_below="@+id/input_desc"
         android:text="@string/schedule_prompt"
         android:textAppearance="?android:attr/textAppearanceLarge" />
+        -->
 
 </RelativeLayout>
