@@ -1,33 +1,25 @@
 package com.ucsd.cs110w.group16.placeits;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
-import android.content.Context;
-import android.location.Address;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 public class ListActivity extends FragmentActivity implements
@@ -169,7 +161,37 @@ public class ListActivity extends FragmentActivity implements
          */
         public static final String ARG_SECTION_NUMBER = "section_number";
 
+        List<String> listActive;
+        List<String> listInActive;
+        List<PlaceIt> activePlaceIts;
+        List<PlaceIt> inActivePlaceIts;
+
         public DummySectionFragment() {
+            listActive = new ArrayList<String>();
+            listInActive = new ArrayList<String>();
+        }
+
+        private void generateDataSet() {
+            activePlaceIts = placeItManager.getActivePlaceIts();
+
+            inActivePlaceIts = placeItManager.getInActivePlaceIts();
+            listActive.clear();
+            
+            for (int j = 0; j < activePlaceIts.size(); j++) {
+                PlaceIt result = activePlaceIts.get(j);
+                StringBuilder strResult = new StringBuilder();
+                strResult.append(result.getTitle()).append("\n");
+                strResult.append(result.getDesc());
+                listActive.add(strResult.toString());
+            }
+            listInActive.clear();
+            for (int j = 0; j < inActivePlaceIts.size(); j++) {
+                PlaceIt result = inActivePlaceIts.get(j);
+                StringBuilder strResult = new StringBuilder();
+                strResult.append(result.getTitle()).append("\n");
+                strResult.append(result.getDesc());
+                listInActive.add(strResult.toString());
+            }
         }
 
         @Override
@@ -177,53 +199,72 @@ public class ListActivity extends FragmentActivity implements
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main_dummy,
                     container, false);
-            final List<PlaceIt> storedPlaceIts;
-            if (getArguments().getInt(ARG_SECTION_NUMBER) == 1)
-                storedPlaceIts = placeItManager.getActivePlaceIts();
-            else
-                storedPlaceIts = placeItManager.getInActivePlaceIts();
+            generateDataSet();
             ListView dummyListView = (ListView) rootView
                     .findViewById(R.id.section_label);
-            String arrResult[] = new String[storedPlaceIts.size()];
-            for (int j = 0; j < storedPlaceIts.size(); j++) {
-                PlaceIt result = storedPlaceIts.get(j);
-                StringBuilder strResult = new StringBuilder();
-                strResult.append(result.getTitle()).append("\n");
-                strResult.append(result.getDesc());
-                arrResult[j] = strResult.toString();
-            }
+            final ArrayAdapter<String> listOfActives = new ArrayAdapter<String>(
+                    getActivity(), R.layout.list_repost, R.id.text, listActive);
+            final ArrayAdapter<String> listOfInActives = new ArrayAdapter<String>(
+                    getActivity(), R.layout.list_delete, R.id.text,
+                    listInActive);
             if (getArguments().getInt(ARG_SECTION_NUMBER) == 1) {
-                ArrayAdapter<String> listOfActives = new ArrayAdapter<String>(
-                        getActivity(), R.layout.list_repost, R.id.text,
-                        arrResult);
+
                 dummyListView.setAdapter(listOfActives);
                 dummyListView.setOnItemClickListener(new OnItemClickListener() {
 
                     @Override
-                    public void onItemClick(AdapterView<?> arg0, View arg1,
-                            int arg2, long arg3) {
-                       placeItManager.setInActive(storedPlaceIts.get(arg2));  
-                    }
-                    
-                });
-            }
-            else {
-                dummyListView.setAdapter(new ArrayAdapter<String>(
-                        getActivity(), R.layout.list_delete, R.id.text,
-                        arrResult));
-                dummyListView.setOnItemClickListener(new OnItemClickListener() {
+                    public void onItemClick(AdapterView<?> arg0,
+                            final View arg1, int arg2, long arg3) {
+                        placeItManager.setInActive(activePlaceIts.get(arg2));
+                        arg1.animate().setDuration(5).alpha(0)
+                                .withEndAction(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        listOfActives.clear();
+                                        listOfInActives.clear();
+                                        generateDataSet();
+                                        listOfInActives.notifyDataSetChanged();
+                                        listOfActives.notifyDataSetChanged();
+                                        arg1.setAlpha(1);
+                                    }
+                                });
+                        Toast.makeText(getActivity(),
+                                "Place It has been removed", Toast.LENGTH_SHORT)
+                                .show();
 
-                    @Override
-                    public void onItemClick(AdapterView<?> arg0, View arg1,
-                            int arg2, long arg3) {
-                       placeItManager.createPlaceIt(storedPlaceIts.get(arg2));  
                     }
-                    
+
+                });
+            } else {
+                dummyListView.setAdapter(listOfInActives);
+                dummyListView.setOnItemClickListener(new OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> arg0,
+                            final View arg1, int arg2, long arg3) {
+                        placeItManager.registerGeofence(placeItManager
+                                .createPlaceIt(inActivePlaceIts.get(arg2)));
+                        arg1.animate().setDuration(5).alpha(0)
+                                .withEndAction(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        listOfActives.clear();
+                                        listOfInActives.clear();
+                                        generateDataSet();
+                                        listOfInActives.notifyDataSetChanged();
+                                        listOfActives.notifyDataSetChanged();
+                                        arg1.setAlpha(1);
+                                    }
+                                });
+                        Toast.makeText(getActivity(),
+                                "Place It has been added", Toast.LENGTH_SHORT)
+                                .show();
+                    }
+
                 });
             }
             return rootView;
-        }             
+        }
 
     }
-    
+
 }

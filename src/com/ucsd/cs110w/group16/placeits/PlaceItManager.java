@@ -130,17 +130,16 @@ public class PlaceItManager {
     }
 	
 
-    public void createPlaceIt(PlaceIt placeIt) {
-        createPlaceIt(placeIt.getTitle(), placeIt.getDesc(), new LatLng(placeIt.getLatitude(), placeIt.getLongitude()));
+    public PlaceIt createPlaceIt(PlaceIt placeIt) {
+        return createPlaceIt(placeIt.getTitle(), placeIt.getDesc(), new LatLng(placeIt.getLatitude(), placeIt.getLongitude()));
         
     }
     
     
-    public void createPlaceIt(String title, String desc, LatLng arg0) {        
+    public PlaceIt createPlaceIt(String title, String desc, LatLng arg0) {        
 
         //create the place it in our database
-        PlaceIt mPlaceIt = mDb.createPlaceIt(arg0.latitude, arg0.longitude, title, desc, true);
-        registerGeofence(mPlaceIt);
+        return mDb.createPlaceIt(arg0.latitude, arg0.longitude, title, desc, true);        
 
         
     }

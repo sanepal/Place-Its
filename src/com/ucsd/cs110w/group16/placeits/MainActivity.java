@@ -121,7 +121,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
             	}
             	if (flag)
             	{	
-            		/* Put command to trigger when alarm goes off here */
+            		placeItManager.registerGeofence(placeItManager.getPlaceIt((long) alarmToCancel));
             	}
 			}
 
@@ -130,6 +130,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
     }
 
     private void displayActivePlaceIts() {
+        map.clear();
         List<PlaceIt> activePlaceIts = placeItManager.getActivePlaceIts();
         for( PlaceIt placeIt : activePlaceIts) {
             map.addMarker(new MarkerOptions().position(new LatLng(placeIt.getLatitude(), placeIt.getLongitude()))
@@ -235,6 +236,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
                 mBroadcastReceiver, mIntentFilter);
         map.animateCamera(CameraUpdateFactory.newCameraPosition(mPrefs
                 .getCameraPosition()), 18, null);
+        displayActivePlaceIts();
     }
 
     /*
@@ -442,9 +444,9 @@ public class MainActivity extends Activity implements OnMapClickListener,
                                 .snippet(inputDesc.getText().toString()));
                         // TODO get values from dropdown boxes
                         // TODO check inputs for empty values
-                        placeItManager.createPlaceIt(inputTitle.getText()
+                        placeItManager.registerGeofence((placeItManager.createPlaceIt(inputTitle.getText()
                                 .toString(), inputDesc.getText().toString(),
-                                location);
+                                location)));
                     }
                 });
         builder.setNegativeButton("Cancel",

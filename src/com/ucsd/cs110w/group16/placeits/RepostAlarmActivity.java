@@ -14,7 +14,7 @@ import android.app.PendingIntent;
 public class RepostAlarmActivity extends Activity implements OnClickListener{
 
 	final static private long ONE_SECOND = 1000;
-	//final static private long TEN_SECONDS = ONE_SECOND * 10;
+	final static private long TEN_SECONDS = ONE_SECOND * 10;
 	//final static private long TWENTY_SECONDS = ONE_SECOND * 20;
 	//final static private long THIRTY_SECONDS = ONE_SECOND * 30;
 	final static private long ONE_MINUTE = ONE_SECOND * 60;
