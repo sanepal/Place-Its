@@ -86,6 +86,8 @@ public class ListActivity extends FragmentActivity implements
                     .setText(mSectionsPagerAdapter.getPageTitle(i))
                     .setTabListener(this));
         }
+        
+        // Update all these static members when the ListView is created.
         placeItManager = new PlaceItManager(this);
         activePlaceIts = placeItManager.getActivePlaceIts();
         inActivePlaceIts = placeItManager.getInActivePlaceIts();
@@ -170,15 +172,7 @@ public class ListActivity extends FragmentActivity implements
          */
         public static final String ARG_SECTION_NUMBER = "section_number";
 
-        /*List<PlaceIt> activePlaceIts;
-        List<PlaceIt> inActivePlaceIts;*/
-
         public DummySectionFragment() {
-        }
-
-        private void generateDataSet() {
-            /*activePlaceIts = placeItManager.getActivePlaceIts();
-            inactivePlaceIts = placeItManager.getInActivePlaceIts();*/
         }
 
         @Override
@@ -186,14 +180,10 @@ public class ListActivity extends FragmentActivity implements
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main_dummy,
                     container, false);
-            //generateDataSet();
             
             ListView dummyListView = (ListView) rootView
                     .findViewById(R.id.section_label);
-            /*final ArrayAdapter<PlaceIt> listOfActives = new ArrayAdapter<PlaceIt>(
-                    getActivity(), R.layout.list_repost, R.id.text, activePlaceIts);
-            final ArrayAdapter<PlaceIt> listOfInActives = new ArrayAdapter<PlaceIt>(
-                    getActivity(), R.layout.list_delete, R.id.text, inActivePlaceIts);*/
+            
             if (getArguments().getInt(ARG_SECTION_NUMBER) == 1) {
 
                 dummyListView.setAdapter(listOfActives);
@@ -202,10 +192,12 @@ public class ListActivity extends FragmentActivity implements
                     @Override
                     public void onItemClick(AdapterView<?> arg0,
                             final View arg1, int arg2, long arg3) {
+                    	// Set place it to inactive and update the lists.
                     	PlaceIt removedPlaceIt = activePlaceIts.get(arg2);
                         placeItManager.setInActive(removedPlaceIt);
                     	activePlaceIts.remove(removedPlaceIt);
                     	inActivePlaceIts.add(removedPlaceIt);
+                    	
                         arg1.animate().setDuration(5).alpha(0)
                                 .withEndAction(new Runnable() {
                                     @Override
@@ -228,11 +220,14 @@ public class ListActivity extends FragmentActivity implements
                     @Override
                     public void onItemClick(AdapterView<?> arg0,
                             final View arg1, int arg2, long arg3) {
+                    	
+                    	// Repost place it and update lists.
                     	PlaceIt repostedPlaceIt = inActivePlaceIts.get(arg2);
                     	placeItManager.setActive(repostedPlaceIt);
                         placeItManager.registerGeofence(repostedPlaceIt);
                         activePlaceIts.add(repostedPlaceIt);
                         inActivePlaceIts.remove(repostedPlaceIt);
+                        
                         arg1.animate().setDuration(5).alpha(0)
                                 .withEndAction(new Runnable() {
                                     @Override
@@ -252,9 +247,11 @@ public class ListActivity extends FragmentActivity implements
                 	public boolean onItemLongClick(AdapterView<?> arg0, final View arg1,
                 			int pos, long id) {
                 		
+                		// Delete place it and update list
                 		PlaceIt deletedPlaceIt = inActivePlaceIts.get(pos);
                 		placeItManager.removePlaceIt(deletedPlaceIt);
                         inActivePlaceIts.remove(deletedPlaceIt);
+                        
                         arg1.animate().setDuration(5).alpha(0)
                                 .withEndAction(new Runnable() {
                                     @Override
