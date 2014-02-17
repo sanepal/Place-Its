@@ -143,9 +143,6 @@ public class ReceiveTransitionsIntentService extends IntentService {
         //two intents for dismiss and snooze function receivers
         Intent dismissReceive = new Intent();  
         dismissReceive.setAction("com.ucsd.cs110w.group16.placeits.dismiss");
-        Bundle dismissBundle = new Bundle();            
-        dismissBundle.putInt("PlaceItId",Integer.parseInt(ids));
-        dismissReceive.putExtras(dismissBundle);
         PendingIntent pendingIntentDismiss = PendingIntent.getBroadcast(this, 0, dismissReceive, PendingIntent.FLAG_UPDATE_CURRENT);
 
         
@@ -168,7 +165,7 @@ public class ReceiveTransitionsIntentService extends IntentService {
                .setContentTitle(activatedPlaceit.getTitle())
                .setContentText(activatedPlaceit.getDesc())
                .setContentIntent(notificationPendingIntent)
-               .addAction(R.drawable.ic_snooze, "Snooze", pendingIntentSnooze)
+               //.addAction(R.drawable.ic_snooze, "Snooze", pendingIntentSnooze)
                .addAction(R.drawable.ic_dismiss, "Dismiss", pendingIntentDismiss)
                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                .setAutoCancel(true);

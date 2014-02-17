@@ -51,6 +51,10 @@ public class RepostAlarmActivity extends Activity implements OnClickListener{
 		calendar.set(Calendar.SECOND,59);
 	}
 
+	public void ten_second(View v) {
+	    am.set(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis() + TEN_SECONDS,pi);
+        finish();
+	}
 	public void one_day(View v){
 		
 		am.set(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),pi);

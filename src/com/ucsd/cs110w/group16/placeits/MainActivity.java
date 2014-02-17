@@ -434,6 +434,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
                 .findViewById(R.id.input_desc);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(layout);
+        builder.setTitle("Enter your details");
         builder.setPositiveButton("Save",
                 new DialogInterface.OnClickListener() {
                     @Override
