@@ -41,8 +41,8 @@ public class MainActivityTest extends
         solo.assertCurrentActivity("MainActivity", MainActivity.class);
         int fromX = (sWidth/2) - (sWidth/3);
         int toX = (sWidth/2) + (sWidth/3);
-        int fromY = sHeight/2;
-        int toY = sHeight/2;
+        int fromY = sHeight/2 + 5;
+        int toY = sHeight/2 + 5;
         solo.drag(fromX, toX, fromY, toY, 1);
         solo.clickOnScreen(sWidth / 2, sHeight / 2);
         solo.waitForDialogToOpen();
@@ -71,8 +71,8 @@ public class MainActivityTest extends
         solo.assertCurrentActivity("MainActivity", MainActivity.class);
         int fromX = (sWidth/2) - (sWidth/3);
         int toX = (sWidth/2) + (sWidth/3);
-        int fromY = sHeight/2;
-        int toY = sHeight/2;
+        int fromY = sHeight/2 + 5;
+        int toY = sHeight/2 + 5;
         solo.drag(fromX, toX, fromY, toY, 1);
         solo.clickOnScreen(sWidth / 2, sHeight / 2);
         solo.waitForDialogToOpen();

@@ -11,6 +11,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -135,7 +136,8 @@ public class MainActivity extends Activity implements OnMapClickListener,
         for( PlaceIt placeIt : activePlaceIts) {
             map.addMarker(new MarkerOptions().position(new LatLng(placeIt.getLatitude(), placeIt.getLongitude()))
                     .title(placeIt.getTitle())
-                    .snippet(placeIt.getDesc()));
+                    .snippet(placeIt.getDesc()))
+                    .setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_placeit));
         }
         
     }
@@ -442,7 +444,8 @@ public class MainActivity extends Activity implements OnMapClickListener,
                         dialog.dismiss();
                         map.addMarker(new MarkerOptions().position(location)
                                 .title(inputTitle.getText().toString())
-                                .snippet(inputDesc.getText().toString()));
+                                .snippet(inputDesc.getText().toString())
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_placeit)));
                         // TODO get values from dropdown boxes
                         // TODO check inputs for empty values
                         placeItManager.registerGeofence((placeItManager.createPlaceIt(inputTitle.getText()

@@ -161,7 +161,7 @@ public class ReceiveTransitionsIntentService extends IntentService {
         PlaceIt activatedPlaceit = placeItManager.getPlaceIt((long) Integer.parseInt(ids));
         placeItManager.setInActive(activatedPlaceit);
         // Set the notification contents
-        builder.setSmallIcon(R.drawable.ic_notification)
+        builder.setSmallIcon(R.drawable.ic_placeit)
                .setContentTitle(activatedPlaceit.getTitle())
                .setContentText(activatedPlaceit.getDesc())
                .setContentIntent(notificationPendingIntent)

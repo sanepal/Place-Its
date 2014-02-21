@@ -9,13 +9,13 @@ import android.test.ActivityInstrumentationTestCase2;
 import android.util.DisplayMetrics;
 
 public class ListActivityTest extends
-        ActivityInstrumentationTestCase2<ListActivity> {
+        ActivityInstrumentationTestCase2<MainActivity> {
     private Solo solo;
     private int sWidth;
     private int sHeight;
     
     public ListActivityTest() {
-        super(ListActivity.class);
+        super(MainActivity.class);        
     }
 
     protected void setUp() throws Exception {
@@ -28,22 +28,20 @@ public class ListActivityTest extends
         sWidth = displaymetrics.widthPixels;
     }
     
-    
     /*
-     * Given that the user is in our main activity 
-     * And they click on the map
-     * Then a prompt to create a place it should display 
-     * And if they click yes
-     * Then a prompt to enter details should show up 
-     * And if they click save then
-     * The dialog disappears and a marker appears at the location
+     * Given that the user has created a Place It
+     * and they want to remove it
+     * then when they view the list of active Place It's
+     * and click on remove
+     * the place it should not show up on the map
      */
-    public void testCreatePlaceIt() throws InterruptedException {
+    public void testListRemove() {
+        //make the place it
         solo.assertCurrentActivity("MainActivity", MainActivity.class);
         int fromX = (sWidth/2) - (sWidth/3);
         int toX = (sWidth/2) + (sWidth/3);
-        int fromY = sHeight/2;
-        int toY = sHeight/2;
+        int fromY = sHeight/2 - 5;
+        int toY = sHeight/2 - 5;
         solo.drag(fromX, toX, fromY, toY, 1);
         solo.clickOnScreen(sWidth / 2, sHeight / 2);
         solo.waitForDialogToOpen();
@@ -54,30 +52,64 @@ public class ListActivityTest extends
         solo.enterText(0, "Place It 1");
         solo.enterText(1, "Reminder 1");
         solo.clickOnText("Save");
-        // test the marker is there by clicking on the place it and searching
-        // for the text
+        //go into List Activity
         solo.clickOnActionBarItem(R.id.action_placeits);
         solo.assertCurrentActivity("ListActivity", ListActivity.class);
-        assertTrue(solo.searchText("Place It 1"));
-        solo.clickOnText("Place It 1");
-        solo.wait(20);
-        assertFalse(solo.searchText("Place It 1"));
-        solo.clickOnText("PULLED DOWN");
-        assertTrue(solo.searchText("Place It 1"));
-        solo.clickOnText("Place It 1");
-        solo.wait(20);
-        assertFalse(solo.searchText("Place It 1"));
-        solo.clickOnText("ACTIVE");
-        assertTrue(solo.searchText("Place It 1"));
-        solo.clickOnText("Place It 1");
-        solo.wait(20);
-        assertFalse(solo.searchText("Place It 1"));
-        solo.clickOnText("PULLED DOWN");
-        assertTrue(solo.searchText("Place It 1"));
-        solo.clickLongOnText("Place It 1");
-        solo.wait(20);
-        assertFalse(solo.searchText("Place It 1"));
-        solo.clickOnText("ACTIVE");
-        assertFalse(solo.searchText("Place It 1"));
+        //remove place it
+        solo.clickInList(0);
+        solo.goBack();
+        //place it is not on map anymore because the dialog box to make a new 
+        //one popped up
+        solo.clickOnScreen(sWidth / 2, sHeight / 2);
+        assertTrue(solo.waitForDialogToOpen());
     }
+    
+    /*
+     * Given that a Place It was pulled down 
+     * and the user wants to repost it
+     * then when they view the list of pulled down Place It's
+     * and click on repost 
+     * the place it should show back up on the map
+     */
+    public void testListRepost() {
+        //make the place it
+        solo.assertCurrentActivity("MainActivity", MainActivity.class);
+        int fromX = (sWidth/2) - (sWidth/3);
+        int toX = (sWidth/2) + (sWidth/3);
+        int fromY = sHeight/2 - 5;
+        int toY = sHeight/2 - 5;
+        solo.drag(fromX, toX, fromY, toY, 1);
+        solo.clickOnScreen(sWidth / 2, sHeight / 2);
+        solo.waitForDialogToOpen();
+        assertTrue(solo.searchText("Create Place It here?"));
+        solo.clickOnText("YES");
+        solo.waitForDialogToOpen();
+        assertTrue(solo.searchText("Enter your details"));
+        solo.enterText(0, "Place It 1");
+        solo.enterText(1, "Reminder 1");
+        solo.clickOnText("Save");
+        //go into List Activity
+        solo.clickOnActionBarItem(R.id.action_placeits);
+        solo.assertCurrentActivity("ListActivity", ListActivity.class);
+        //remove place it
+        solo.clickInList(0);
+        solo.goBack();
+        //place it is not on map anymore because the dialog box to make a new 
+        //one popped up
+        solo.clickOnScreen(sWidth / 2, sHeight / 2);
+        assertTrue(solo.waitForDialogToOpen());
+        solo.clickOnText("NO");
+        //go back to lists activity
+        solo.clickOnActionBarItem(R.id.action_placeits);
+        solo.assertCurrentActivity("ListActivity", ListActivity.class);
+        //click on reposts tab
+        solo.clickOnText("PULLED DOWN");
+        //repost place it
+        solo.clickOnText("Repost");
+        //go back to main activity and try to make new place it
+        solo.goBackToActivity("MainActivity");
+        solo.clickOnScreen(sWidth / 2, sHeight / 2);
+        assertFalse(solo.waitForDialogToOpen());        
+    }
+  
 }
