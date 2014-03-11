@@ -30,14 +30,19 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.ucsd.cs110w.group16.placeits.MainActivity"
-            android:label="@string/app_name"
-            android:launchMode="singleTop" >
+            android:name="com.ucsd.cs110w.group16.placeits.LoginActivity"
+            android:label="@string/title_activity_login"
+            android:windowSoftInputMode="adjustResize|stateVisible"
+            android:noHistory="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="com.ucsd.cs110w.group16.placeits.MainActivity"
+            android:label="@string/app_name"
+            android:launchMode="singleTop" >            
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -71,22 +76,24 @@
             android:exported="false"
             android:label="@string/app_name" >
         </service>
-        <service android:name=".PlaceUpdateService" android:exported="false" >
+        <service
+            android:name="com.ucsd.cs110w.group16.placeits.PlaceUpdateService"
+            android:exported="false" >
             <intent-filter>
                 <action android:name="com.ucsd.cs110w.group16.placeits.placesupdateservice" />
             </intent-filter>
         </service>
 
-        <receiver android:name=".LocationChangedReceiver" />
-        <receiver android:name=".PassiveLocationChangedReceiver" />
+        <receiver android:name="com.ucsd.cs110w.group16.placeits.LocationChangedReceiver" />
+        <receiver android:name="com.ucsd.cs110w.group16.placeits.PassiveLocationChangedReceiver" />
         <receiver
-            android:name=".ConnectivityChangedReceiver"
+            android:name="com.ucsd.cs110w.group16.placeits.ConnectivityChangedReceiver"
             android:enabled="false" >
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".ReceiveNotificationEvents" >
+        <receiver android:name="com.ucsd.cs110w.group16.placeits.ReceiveNotificationEvents" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -105,6 +112,8 @@
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyAOweyalgMh71s_L9aB7Smu158kwqWs2yU" />
+
+        
     </application>
 
 </manifest>

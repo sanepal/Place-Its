@@ -1,6 +1,5 @@
 package com.ucsd.cs110w.group16.placeits;
 
-import java.io.Console;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,8 +21,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -222,7 +219,7 @@ OnMarkerClickListener, OnConnectionFailedListener {
      * handle the search intent
      */
     private void handleIntent(Intent intent) {
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+        if (intent.getAction().equals(Intent.ACTION_SEARCH)) {
             String query = intent.getStringExtra(SearchManager.QUERY);
             GetAddressResults loadplaces = new GetAddressResults(this);
             if (searchItem != null)
