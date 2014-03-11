@@ -1,7 +1,7 @@
 package com.ucsd.cs110w.group16.placeits;
 
+import java.io.Console;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -19,8 +19,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.location.Address;
 import android.os.Bundle;
+import android.os.Handler;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -39,21 +42,25 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.SearchView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 public class MainActivity extends Activity implements OnMapClickListener,
-        OnMarkerClickListener, OnConnectionFailedListener {
+OnMarkerClickListener, OnConnectionFailedListener {
     private GoogleMap map;
     private Marker searchResult = null;
     private MenuItem searchItem;
     private CameraPositionStore mPrefs;
     private PlaceItManager placeItManager;
 
+    private int selected = 0;
+
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-    
-    ArrayList<Integer> alarmCancelList;	// List to hold Id's of alarms to cancel.
-    BroadcastReceiver alarmReceiver;	// Receiver to receive alarms.
-    
+
+    ArrayList<Integer> alarmCancelList; // List to hold Id's of alarms to
+    // cancel.
+    BroadcastReceiver alarmReceiver; // Receiver to receive alarms.
+
     /*
      * An instance of an inner class that receives broadcasts from listeners and
      * from the IntentService that receives geofence transition events
@@ -81,18 +88,18 @@ public class MainActivity extends Activity implements OnMapClickListener,
 
         // Action for broadcast Intents that report successful addition of
         // geofences
-        mIntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCES_ADDED);
+        mIntentFilter.addAction(PlaceItUtils.ACTION_GEOFENCES_ADDED);
 
         // Action for broadcast Intents that report successful removal of
         // geofences
-        mIntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCES_REMOVED);
+        mIntentFilter.addAction(PlaceItUtils.ACTION_GEOFENCES_REMOVED);
 
         // Action for broadcast Intents containing various types of geofencing
         // errors
-        mIntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCE_ERROR);
+        mIntentFilter.addAction(PlaceItUtils.ACTION_GEOFENCE_ERROR);
 
         // All Location Services sample apps use this category
-        mIntentFilter.addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES);
+        mIntentFilter.addCategory(PlaceItUtils.CATEGORY_LOCATION_SERVICES);
         mPrefs = new CameraPositionStore(this);
         placeItManager = new PlaceItManager(this);
         setUpMapIfNeeded();
@@ -101,68 +108,48 @@ public class MainActivity extends Activity implements OnMapClickListener,
         map.setOnMapClickListener(this);
         map.setOnMarkerClickListener(this);
         handleIntent(getIntent());
-        
-        /**
-         * BroadcastReceiver to receive alarms and determine what to do when an alarm is received
-         * Add what should be done when the alarm is received in here.
-         */
-        alarmReceiver = new BroadcastReceiver() {
-            @Override
-			public void onReceive(Context c, Intent i) {
-            	boolean flag = true;
-            	int alarmToCancel = i.getIntExtra("com.ucsd.cs110w.group16.placeits.Id",0);	//Gets the ID from the intent
-            	Iterator<Integer> myIterator = alarmCancelList.iterator();
-            	while(myIterator.hasNext())						//Goes through list to see if ID from
-            	{												//intent received matches any of the Integers
-            		Integer IntCancel = myIterator.next();		//in the alarms to cancel list
-            		if( (int) IntCancel == alarmToCancel)
-            		{
-            			flag = false;							//cancel this alarm.
-            		}
-            	}
-            	if (flag)
-            	{	
-            		placeItManager.registerGeofence(placeItManager.getPlaceIt((long) alarmToCancel));
-            	}
-			}
-
-        };
-        registerReceiver(alarmReceiver, new IntentFilter("com.ucsd.cs110w.group16.placeits") );
     }
 
     private void displayActivePlaceIts() {
         map.clear();
         List<PlaceIt> activePlaceIts = placeItManager.getActivePlaceIts();
-        for( PlaceIt placeIt : activePlaceIts) {
-            map.addMarker(new MarkerOptions().position(new LatLng(placeIt.getLatitude(), placeIt.getLongitude()))
-                    .title(placeIt.getTitle())
-                    .snippet(placeIt.getDesc()))
-                    .setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_placeit));
+        for (PlaceIt placeIt : activePlaceIts) {
+            map.addMarker(
+                    new MarkerOptions()
+                    .position(
+                            new LatLng(placeIt.getLatitude(), placeIt
+                                    .getLongitude()))
+                                    .title(placeIt.getTitle())
+                                    .snippet(placeIt.getDesc()))
+                                    .setIcon(
+                                            BitmapDescriptorFactory
+                                            .fromResource(R.drawable.ic_placeit));
         }
-        
+
     }
 
     /*
      * Handle results returned to this Activity by other Activities started with
-     * startActivityForResult(). In particular, the method onConnectionFailed() in
-     * GeofenceRemover and GeofenceRequester may call startResolutionForResult() to
-     * start an Activity that handles Google Play services problems. The result of this
-     * call returns here, to onActivityResult.
-     * calls
+     * startActivityForResult(). In particular, the method onConnectionFailed()
+     * in GeofenceRemover and GeofenceRequester may call
+     * startResolutionForResult() to start an Activity that handles Google Play
+     * services problems. The result of this call returns here, to
+     * onActivityResult. calls
      */
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        
-        placeItManager.handleActivityResult(requestCode, resultCode, intent);        
+    protected void onActivityResult(int requestCode, int resultCode,
+            Intent intent) {
+
+        placeItManager.handleActivityResult(requestCode, resultCode, intent);
     }
-    
+
     private void setUpMapIfNeeded() {
         if (map == null) {
             map = ((MapFragment) getFragmentManager()
                     .findFragmentById(R.id.map)).getMap();
         }
     }
-    
+
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         /*
@@ -191,40 +178,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
             Toast.makeText(this, "FAILURE!", Toast.LENGTH_LONG).show();
         }
     }
-    
-    /**
-     * Calls the activity to set up a scheduling alarm, which is the weekly alarm. Sets the PlaceIt
-     * at 11:59:59 PM the day before the PlaceIt should appear.
-     * @param Id the Id of the place it to set a schedule for.
-     */
-    public void setupSchedulingAlarm(Integer Id)
-    {
-    	Intent alarmActivity = new Intent(this, SchedulingAlarmActivity.class);
-		alarmActivity.putExtra("com.ucsd.cs110w.group16.placeits.Id",Id);
-		startActivity(alarmActivity);
-    }
-    
-    /**
-     * Calls the activity to set up a repost alarm, which has 4 options: 1 day, 2 days, 1 week, 2 weeks.
-     * @param Id the Id of the place it to repost.
-     */
-    public void setupRepostAlarm(Integer Id)
-    {
-    	Intent alarmActivity = new Intent(this, RepostAlarmActivity.class);
-		alarmActivity.putExtra("com.ucsd.cs110w.group16.placeits.Id",Id);
-		startActivity(alarmActivity);
-    }
-    
-    /**
-     * Adds the id to cancel to the list of alarms to cancel, so that when the broadcast with that Id
-     * is received, it will ignore it.
-     * @param Id the Id of the alarm to cancel.
-     */
-    public void cancelAlarm(Integer Id)
-	{
-		alarmCancelList.add(Id);
-	}
-    
+
     /*
      * (non-Javadoc)
      * 
@@ -271,16 +225,21 @@ public class MainActivity extends Activity implements OnMapClickListener,
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
             GetAddressResults loadplaces = new GetAddressResults(this);
-            if(searchItem != null)
+            if (searchItem != null)
                 searchItem.collapseActionView();
             loadplaces.execute(query);
-        }
-        else if(intent.getAction().equals("com.ucsd.cs110w.group16.placeits.launchAppWithPlaceIt")) {
-            PlaceIt placeIt = placeItManager.getPlaceIt((long) intent.getExtras().getInt("PlaceItId"));
-            Marker marker = map.addMarker(new MarkerOptions().position(new LatLng(placeIt.getLatitude(), placeIt.getLongitude()))
-                    .title(placeIt.getTitle())
-                    .snippet(placeIt.getDesc()));
-            map.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(marker.getPosition(), 5, 0, 0)), 5 , null);
+        } else if (intent.getAction().equals(
+                "com.ucsd.cs110w.group16.placeits.launchAppWithPlaceIt")) {
+            PlaceIt placeIt = placeItManager.getPlaceIt((long) intent
+                    .getExtras().getInt("PlaceItId"));
+            Marker marker = map.addMarker(new MarkerOptions()
+            .position(
+                    new LatLng(placeIt.getLatitude(), placeIt
+                            .getLongitude())).title(placeIt.getTitle())
+                            .snippet(placeIt.getDesc()));
+            map.animateCamera(CameraUpdateFactory
+                    .newCameraPosition(new CameraPosition(marker.getPosition(),
+                            5, 0, 0)), 5, null);
             marker.showInfoWindow();
         }
     }
@@ -337,9 +296,9 @@ public class MainActivity extends Activity implements OnMapClickListener,
                 searchResult = map.addMarker(new MarkerOptions().position(
                         new LatLng(results.get(which).getLatitude(), results
                                 .get(which).getLongitude())).title(
-                        results.get(which).getFeatureName() != null ? results
-                                .get(which).getFeatureName() : results.get(
-                                which).getAddressLine(0)));
+                                        results.get(which).getFeatureName() != null ? results
+                                                .get(which).getFeatureName() : results.get(
+                                                        which).getAddressLine(0)));
                 searchResult.showInfoWindow();
 
             }
@@ -358,13 +317,26 @@ public class MainActivity extends Activity implements OnMapClickListener,
 
     @Override
     public void onMapClick(final LatLng location) {
+        selected = 0;
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(R.string.prompt);
+        builder.setTitle(R.string.prompt);
+        builder.setSingleChoiceItems(R.array.choices, selected,
+                new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                selected = which;
+
+            }
+        });
         builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                showInputDialog(location);
+                if (selected == 0)
+                    showSingleInputDialog(location);
+                else
+                    showCategoricalInputDialog();
             }
         });
         builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
@@ -396,20 +368,20 @@ public class MainActivity extends Activity implements OnMapClickListener,
             builder.setMessage("Create Place It for " + marker.getTitle() + "?");
             builder.setPositiveButton("YES",
                     new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                            showInputDialog(marker.getPosition());
-                        }
-                    });
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    showSingleInputDialog(marker.getPosition());
+                }
+            });
             builder.setNegativeButton("NO",
                     new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            // Code that is executed when clicking NO
-                            dialog.dismiss();
-                        }
-                    });
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    // Code that is executed when clicking NO
+                    dialog.dismiss();
+                }
+            });
             AlertDialog alert = builder.create();
             alert.show();
             marker.remove();
@@ -423,7 +395,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
      * Shows the input dialog for Place it creation with regards to details
      * about the PLace it
      */
-    private void showInputDialog(final LatLng location) {
+    private void showSingleInputDialog(final LatLng location) {
         // Preparing views
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         // the edit text's are part of the relative layout viewgroup in the
@@ -439,31 +411,85 @@ public class MainActivity extends Activity implements OnMapClickListener,
         builder.setTitle("Enter your details");
         builder.setPositiveButton("Save",
                 new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        map.addMarker(new MarkerOptions().position(location)
-                                .title(inputTitle.getText().toString())
-                                .snippet(inputDesc.getText().toString())
-                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_placeit)));
-                        // TODO get values from dropdown boxes
-                        // TODO check inputs for empty values
-                        placeItManager.registerGeofence((placeItManager.createPlaceIt(inputTitle.getText()
-                                .toString(), inputDesc.getText().toString(),
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                map.addMarker(new MarkerOptions()
+                .position(location)
+                .title(inputTitle.getText().toString())
+                .snippet(inputDesc.getText().toString())
+                .icon(BitmapDescriptorFactory
+                        .fromResource(R.drawable.ic_placeit)));
+                placeItManager.registerGeofence((placeItManager
+                        .createPlaceIt(inputTitle.getText().toString(),
+                                inputDesc.getText().toString(),
                                 location)));
-                    }
-                });
+            }
+        });
         builder.setNegativeButton("Cancel",
                 new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
         AlertDialog dialog = builder.create();
         dialog.show();
     }
-    
+
+    /*
+     * Shows the input dialog for Place it creation with regards to details
+     * about the PLace it
+     */
+    private void showCategoricalInputDialog() {
+        // Preparing views
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        // the edit text's are part of the relative layout viewgroup in the
+        // layout file
+        View layout = inflater.inflate(R.layout.input_category,
+                (ViewGroup) findViewById(R.id.category_root));
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final Spinner option = (Spinner)layout.findViewById(R.id.option_1);
+        final Spinner option2 = (Spinner)layout.findViewById(R.id.option_2);
+        final Spinner option3 = (Spinner)layout.findViewById(R.id.option_3);
+        builder.setView(layout);
+        builder.setTitle("Enter your details");
+        builder.setPositiveButton("Save",
+                new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {                
+                String input = option.getSelectedItem().toString();
+                String input2 = option2.getSelectedItem().toString();
+                String input3 = option3.getSelectedItem().toString();
+                Log.d(PlaceItUtils.APPTAG, ""+input);                
+                if (input.isEmpty() && input2.isEmpty() && input3.isEmpty() ) {  
+                    Log.d(PlaceItUtils.APPTAG, "none");
+                    Toast.makeText(getBaseContext(), "Select at least 1 category", Toast.LENGTH_LONG).show();
+                    dialog.dismiss();
+                    Handler handler = new Handler();
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            showCategoricalInputDialog();
+                        }
+                    });
+                }
+                else {
+                    //create categorical place it
+                }
+                dialog.dismiss();
+            }
+        });
+        builder.setNegativeButton("Cancel",
+                new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
 
     /*
      * Called when the "My Place It's" button is clicked, opens up activity to
@@ -491,28 +517,28 @@ public class MainActivity extends Activity implements OnMapClickListener,
 
             // Intent contains information about errors in adding or removing
             // geofences
-            if (TextUtils.equals(action, GeofenceUtils.ACTION_GEOFENCE_ERROR)) {
+            if (TextUtils.equals(action, PlaceItUtils.ACTION_GEOFENCE_ERROR)) {
 
                 handleGeofenceError(context, intent);
 
                 // Intent contains information about successful addition or
                 // removal of geofences
             } else if (TextUtils.equals(action,
-                    GeofenceUtils.ACTION_GEOFENCES_ADDED)
+                    PlaceItUtils.ACTION_GEOFENCES_ADDED)
                     || TextUtils.equals(action,
-                            GeofenceUtils.ACTION_GEOFENCES_REMOVED)) {
+                            PlaceItUtils.ACTION_GEOFENCES_REMOVED)) {
 
                 handleGeofenceStatus(context, intent);
 
                 // Intent contains information about a geofence transition
             } else if (TextUtils.equals(action,
-                    GeofenceUtils.ACTION_GEOFENCE_TRANSITION)) {
+                    PlaceItUtils.ACTION_GEOFENCE_TRANSITION)) {
 
                 handleGeofenceTransition(context, intent);
 
                 // The Intent contained an invalid action
             } else {
-                Log.e(GeofenceUtils.APPTAG,
+                Log.e(PlaceItUtils.APPTAG,
                         getString(R.string.invalid_action_detail, action));
                 Toast.makeText(context, R.string.invalid_action,
                         Toast.LENGTH_LONG).show();
@@ -556,12 +582,12 @@ public class MainActivity extends Activity implements OnMapClickListener,
          */
         private void handleGeofenceError(Context context, Intent intent) {
             String msg = intent
-                    .getStringExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS);
-            Log.e(GeofenceUtils.APPTAG, msg);
+                    .getStringExtra(PlaceItUtils.EXTRA_GEOFENCE_STATUS);
+            Log.e(PlaceItUtils.APPTAG, msg);
             Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
         }
     }
-    
+
     /**
      * Sets up an alarm for scheduling weekly events
      */

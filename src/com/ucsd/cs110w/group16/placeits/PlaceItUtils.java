@@ -19,7 +19,7 @@ package com.ucsd.cs110w.group16.placeits;
 /**
  * This class defines constants used by location sample apps.
  */
-public final class GeofenceUtils {
+public final class PlaceItUtils {
 
     // Used to track what type of geofence removal request was made.
     public enum REMOVE_TYPE {INTENT, LIST}
@@ -79,7 +79,9 @@ public final class GeofenceUtils {
     public static final String KEY_LONGITUDE = "com.gta0004.cs110w.cs110project.KEY_LONGITUDE";
 
     public static final String KEY_RADIUS = "com.gta0004.cs110w.cs110project.KEY_RADIUS";
-
+    
+    public static final String SHARED_PREFERENCE_FILE = MainActivity.class.getSimpleName();
+    
     public static final String KEY_EXPIRATION_DURATION =
             "com.ucsd.cs110w.placeits.KEY_EXPIRATION_DURATION";
 
@@ -120,5 +122,27 @@ public final class GeofenceUtils {
     public static final String EMPTY_STRING = new String();
 
     public static final CharSequence GEOFENCE_ID_DELIMITER = ",";
+
+    public static final float DEFAULT_RADIUS = 804.5f;    
+    public static final float MAX_DISTANCE = 1609.3f;
+    public static final long MAX_TIME = 15000;
+
+    public static final String CONSTRUCTED_LOCATION_PROVIDER = "CONSTRUCTED_LOCATION_PROVIDER";
+
+    public static final String PLACES_API_KEY = "&key=AIzaSyCgLlnD_HaVJd4Cla4C9hRHd7ZIME86kZA";
+
+    public static final String PLACES_LIST_BASE_URI = "https://maps.googleapis.com/maps/api/place/search/xml?sensor=true";
+
+    public static final String EXTRA_KEY_FORCEREFRESH = "force_refresh";
+    public static final String EXTRA_KEY_LOCATION = "location";
+    public static final String EXTRA_KEY_RADIUS = "radius";
+    
+    public static final String SP_KEY_LAST_LIST_UPDATE_TIME = "SP_KEY_LAST_LIST_UPDATE_TIME";
+    public static final String SP_KEY_LAST_LIST_UPDATE_LAT = "SP_KEY_LAST_LIST_UPDATE_LAT";
+    public static final String SP_KEY_LAST_LIST_UPDATE_LNG = "SP_KEY_LAST_LIST_UPDATE_LNG";
+
+    
+
+    
 
 }

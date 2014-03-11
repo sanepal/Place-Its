@@ -52,7 +52,7 @@ public class GeofenceRemover implements
      *  Record the type of removal. This allows continueRemoveGeofences to call the appropriate
      *  removal request method.
      */
-    private GeofenceUtils.REMOVE_TYPE mRequestType;
+    private PlaceItUtils.REMOVE_TYPE mRequestType;
 
     /*
      * Flag that indicates whether an add or remove request is underway. Check this
@@ -114,7 +114,7 @@ public class GeofenceRemover implements
 
             // If a removal request is not already in progress, continue
             if (!mInProgress) {
-                mRequestType = GeofenceUtils.REMOVE_TYPE.LIST;
+                mRequestType = PlaceItUtils.REMOVE_TYPE.LIST;
                 mCurrentGeofenceIds = geofenceIds;
                 requestConnection();
 
@@ -137,7 +137,7 @@ public class GeofenceRemover implements
         // If a removal request is not in progress, continue
         if (!mInProgress) {
             // Set the request type, store the List, and request a location client connection.
-            mRequestType = GeofenceUtils.REMOVE_TYPE.INTENT;
+            mRequestType = PlaceItUtils.REMOVE_TYPE.INTENT;
             mCurrentIntent = requestIntent;
             requestConnection();
 
@@ -205,24 +205,24 @@ public class GeofenceRemover implements
         if (statusCode == LocationStatusCodes.SUCCESS) {
 
             // In debug mode, log the result
-            Log.d(GeofenceUtils.APPTAG,
+            Log.d(PlaceItUtils.APPTAG,
                     mContext.getString(R.string.remove_geofences_intent_success));
 
             // Set the action and add the result message
-            broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCES_REMOVED);
-            broadcastIntent.putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS,
+            broadcastIntent.setAction(PlaceItUtils.ACTION_GEOFENCES_REMOVED);
+            broadcastIntent.putExtra(PlaceItUtils.EXTRA_GEOFENCE_STATUS,
                     mContext.getString(R.string.remove_geofences_intent_success));
 
         // If removing the geocodes failed
         } else {
 
             // Always log the error
-            Log.e(GeofenceUtils.APPTAG,
+            Log.e(PlaceItUtils.APPTAG,
                     mContext.getString(R.string.remove_geofences_intent_failure, statusCode));
 
             // Set the action and add the result message
-            broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCE_ERROR);
-            broadcastIntent.putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS,
+            broadcastIntent.setAction(PlaceItUtils.ACTION_GEOFENCE_ERROR);
+            broadcastIntent.putExtra(PlaceItUtils.EXTRA_GEOFENCE_STATUS,
                     mContext.getString(R.string.remove_geofences_intent_failure, statusCode));
         }
 
@@ -256,12 +256,12 @@ public class GeofenceRemover implements
                     Arrays.toString(geofenceRequestIds));
 
             // In debug mode, log the result
-            Log.d(GeofenceUtils.APPTAG, msg);
+            Log.d(PlaceItUtils.APPTAG, msg);
 
             // Create an Intent to broadcast to the app
-            broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCES_REMOVED)
-                           .addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES)
-                           .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, msg);
+            broadcastIntent.setAction(PlaceItUtils.ACTION_GEOFENCES_REMOVED)
+                           .addCategory(PlaceItUtils.CATEGORY_LOCATION_SERVICES)
+                           .putExtra(PlaceItUtils.EXTRA_GEOFENCE_STATUS, msg);
 
         } else {
         // If removing the geocodes failed
@@ -277,12 +277,12 @@ public class GeofenceRemover implements
             );
 
             // Log an error
-            Log.e(GeofenceUtils.APPTAG, msg);
+            Log.e(PlaceItUtils.APPTAG, msg);
 
             // Create an Intent to broadcast to the app
-            broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCE_ERROR)
-                           .addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES)
-                           .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, msg);
+            broadcastIntent.setAction(PlaceItUtils.ACTION_GEOFENCE_ERROR)
+                           .addCategory(PlaceItUtils.CATEGORY_LOCATION_SERVICES)
+                           .putExtra(PlaceItUtils.EXTRA_GEOFENCE_STATUS, msg);
         }
 
         // Broadcast whichever result occurred
@@ -306,7 +306,7 @@ public class GeofenceRemover implements
          * the client gets disconnected before the disconnection request finishes; the location
          * updates will still be cancelled.
          */
-        if (mRequestType == GeofenceUtils.REMOVE_TYPE.INTENT) {
+        if (mRequestType == PlaceItUtils.REMOVE_TYPE.INTENT) {
             mCurrentIntent.cancel();
         }
 
@@ -320,7 +320,7 @@ public class GeofenceRemover implements
     @Override
     public void onConnected(Bundle arg0) {
         // If debugging, log the connection
-        Log.d(GeofenceUtils.APPTAG, mContext.getString(R.string.connected));
+        Log.d(PlaceItUtils.APPTAG, mContext.getString(R.string.connected));
 
         // Continue the request to remove the geofences
         continueRemoveGeofences();
@@ -336,7 +336,7 @@ public class GeofenceRemover implements
         mInProgress = false;
 
         // In debug mode, log the disconnection
-        Log.d(GeofenceUtils.APPTAG, mContext.getString(R.string.disconnected));
+        Log.d(PlaceItUtils.APPTAG, mContext.getString(R.string.disconnected));
 
         // Destroy the current location client
         mLocationClient = null;
@@ -364,7 +364,7 @@ public class GeofenceRemover implements
             try {
                 // Start an Activity that tries to resolve the error
                 connectionResult.startResolutionForResult((Activity) mContext,
-                    GeofenceUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
+                    PlaceItUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
 
             /*
              * Thrown if Google Play services canceled the original
@@ -383,9 +383,9 @@ public class GeofenceRemover implements
          */
         } else {
 
-            Intent errorBroadcastIntent = new Intent(GeofenceUtils.ACTION_CONNECTION_ERROR);
-            errorBroadcastIntent.addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES)
-                                .putExtra(GeofenceUtils.EXTRA_CONNECTION_ERROR_CODE,
+            Intent errorBroadcastIntent = new Intent(PlaceItUtils.ACTION_CONNECTION_ERROR);
+            errorBroadcastIntent.addCategory(PlaceItUtils.CATEGORY_LOCATION_SERVICES)
+                                .putExtra(PlaceItUtils.EXTRA_CONNECTION_ERROR_CODE,
                                         connectionResult.getErrorCode());
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(errorBroadcastIntent);
         }

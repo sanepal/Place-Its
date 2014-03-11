@@ -122,9 +122,9 @@ public class PlaceIt {
     private final String desc;
     private final double mLatitude;
     private final double mLongitude;
-    private final float mRadius = (float) 804.5;
+    private final float mRadius = PlaceItUtils.DEFAULT_RADIUS;
     private long mExpirationDuration = Geofence.NEVER_EXPIRE;
-    private int mTransitionType = Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT;
+    private int mTransitionType = Geofence.GEOFENCE_TRANSITION_ENTER;
     private boolean isActive;
 
     /**

@@ -22,8 +22,7 @@
     -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -41,6 +40,9 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.ucsd.cs110w.group16.placeits.launchAppWithPlaceIt" />
             </intent-filter>
 
             <meta-data
@@ -69,9 +71,22 @@
             android:exported="false"
             android:label="@string/app_name" >
         </service>
+        <service android:name=".PlaceUpdateService" android:exported="false" >
+            <intent-filter>
+                <action android:name="com.ucsd.cs110w.group16.placeits.placesupdateservice" />
+            </intent-filter>
+        </service>
 
+        <receiver android:name=".LocationChangedReceiver" />
+        <receiver android:name=".PassiveLocationChangedReceiver" />
         <receiver
-            android:name=".ReceiveNotificationEvents" >
+            android:name=".ConnectivityChangedReceiver"
+            android:enabled="false" >
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".ReceiveNotificationEvents" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>

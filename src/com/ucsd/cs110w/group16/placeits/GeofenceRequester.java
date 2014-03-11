@@ -180,12 +180,12 @@ public class GeofenceRequester
                     Arrays.toString(geofenceRequestIds));
 
             // In debug mode, log the result
-            Log.d(GeofenceUtils.APPTAG, msg);
+            Log.d(PlaceItUtils.APPTAG, msg);
 
             // Create an Intent to broadcast to the app
-            broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCES_ADDED)
-                           .addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES)
-                           .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, msg);
+            broadcastIntent.setAction(PlaceItUtils.ACTION_GEOFENCES_ADDED)
+                           .addCategory(PlaceItUtils.CATEGORY_LOCATION_SERVICES)
+                           .putExtra(PlaceItUtils.EXTRA_GEOFENCE_STATUS, msg);
         // If adding the geofences failed
         } else {
 
@@ -200,12 +200,12 @@ public class GeofenceRequester
             );
 
             // Log an error
-            Log.e(GeofenceUtils.APPTAG, msg);
+            Log.e(PlaceItUtils.APPTAG, msg);
 
             // Create an Intent to broadcast to the app
-            broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCE_ERROR)
-                           .addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES)
-                           .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, msg);
+            broadcastIntent.setAction(PlaceItUtils.ACTION_GEOFENCE_ERROR)
+                           .addCategory(PlaceItUtils.CATEGORY_LOCATION_SERVICES)
+                           .putExtra(PlaceItUtils.EXTRA_GEOFENCE_STATUS, msg);
         }
 
         // Broadcast whichever result occurred
@@ -235,7 +235,7 @@ public class GeofenceRequester
     public void onConnected(Bundle arg0) {
         // If debugging, log the connection
 
-        Log.d(GeofenceUtils.APPTAG, mContext.getString(R.string.connected));
+        Log.d(PlaceItUtils.APPTAG, mContext.getString(R.string.connected));
 
         // Continue adding the geofences
         continueAddGeofences();
@@ -252,7 +252,7 @@ public class GeofenceRequester
         mInProgress = false;
 
         // In debug mode, log the disconnection
-        Log.d(GeofenceUtils.APPTAG, mContext.getString(R.string.disconnected));
+        Log.d(PlaceItUtils.APPTAG, mContext.getString(R.string.disconnected));
 
         // Destroy the current location client
         mLocationClient = null;
@@ -315,7 +315,7 @@ public class GeofenceRequester
             try {
                 // Start an Activity that tries to resolve the error
                 connectionResult.startResolutionForResult((Activity) mContext,
-                    GeofenceUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
+                    PlaceItUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
 
             /*
              * Thrown if Google Play services canceled the original
@@ -334,9 +334,9 @@ public class GeofenceRequester
          */
         } else {
 
-            Intent errorBroadcastIntent = new Intent(GeofenceUtils.ACTION_CONNECTION_ERROR);
-            errorBroadcastIntent.addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES)
-                                .putExtra(GeofenceUtils.EXTRA_CONNECTION_ERROR_CODE,
+            Intent errorBroadcastIntent = new Intent(PlaceItUtils.ACTION_CONNECTION_ERROR);
+            errorBroadcastIntent.addCategory(PlaceItUtils.CATEGORY_LOCATION_SERVICES)
+                                .putExtra(PlaceItUtils.EXTRA_CONNECTION_ERROR_CODE,
                                         connectionResult.getErrorCode());
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(errorBroadcastIntent);
         }

@@ -48,7 +48,7 @@ public class ReceiveTransitionsIntentService extends IntentService {
         Intent broadcastIntent = new Intent();        
 
         // Give it the category for all intents sent by the Intent Service
-        broadcastIntent.addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES);
+        broadcastIntent.addCategory(PlaceItUtils.CATEGORY_LOCATION_SERVICES);
 
         // First check for errors
         if (LocationClient.hasError(intent)) {
@@ -60,11 +60,11 @@ public class ReceiveTransitionsIntentService extends IntentService {
             String errorMessage = LocationServiceErrorMessages.getErrorString(this, errorCode);
 
             // Log the error
-            Log.e(GeofenceUtils.APPTAG, errorMessage);
+            Log.e(PlaceItUtils.APPTAG, errorMessage);
 
             // Set the action and error message for the broadcast intent
-            broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCE_ERROR)
-                           .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, errorMessage);
+            broadcastIntent.setAction(PlaceItUtils.ACTION_GEOFENCE_ERROR)
+                           .putExtra(PlaceItUtils.EXTRA_GEOFENCE_STATUS, errorMessage);
 
             // Broadcast the error *locally* to other components in this app
             LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
@@ -90,24 +90,24 @@ public class ReceiveTransitionsIntentService extends IntentService {
                     geofenceIds[index] = geofences.get(index).getRequestId();
                     sendNotification(transitionType, geofenceIds[index]);
                 }
-                String ids = TextUtils.join(GeofenceUtils.GEOFENCE_ID_DELIMITER,geofenceIds);
+                String ids = TextUtils.join(PlaceItUtils.GEOFENCE_ID_DELIMITER,geofenceIds);
                 
 
                 //sendNotification(transitionType, ids);
 
                 // Log the transition type and a message
-                Log.d(GeofenceUtils.APPTAG,
+                Log.d(PlaceItUtils.APPTAG,
                         getString(
                                 R.string.geofence_transition_notification_title,
                                 transitionType,
                                 ids));
-                Log.d(GeofenceUtils.APPTAG,
+                Log.d(PlaceItUtils.APPTAG,
                         getString(R.string.geofence_transition_notification_text));
 
             // An invalid transition was reported
             } else {
                 // Always log as an error
-                Log.e(GeofenceUtils.APPTAG,
+                Log.e(PlaceItUtils.APPTAG,
                         getString(R.string.geofence_transition_invalid_type, transition));
             }
         }

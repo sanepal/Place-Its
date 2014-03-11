@@ -8,8 +8,8 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.maps.model.LatLng;
-import com.ucsd.cs110w.group16.placeits.GeofenceUtils.REMOVE_TYPE;
-import com.ucsd.cs110w.group16.placeits.GeofenceUtils.REQUEST_TYPE;
+import com.ucsd.cs110w.group16.placeits.PlaceItUtils.REMOVE_TYPE;
+import com.ucsd.cs110w.group16.placeits.PlaceItUtils.REQUEST_TYPE;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -63,7 +63,7 @@ public class PlaceItManager {
         if (ConnectionResult.SUCCESS == resultCode) {
 
             // In debug mode, log the status
-            Log.d(GeofenceUtils.APPTAG, mContext.getString(R.string.play_services_available));
+            Log.d(PlaceItUtils.APPTAG, mContext.getString(R.string.play_services_available));
 
             // Continue
             return true;
@@ -76,7 +76,7 @@ public class PlaceItManager {
             if (dialog != null) {
                 ErrorDialogFragment errorFragment = new ErrorDialogFragment();
                 errorFragment.setDialog(dialog);
-                errorFragment.show(mActivity.getFragmentManager(), GeofenceUtils.APPTAG);
+                errorFragment.show(mActivity.getFragmentManager(), PlaceItUtils.APPTAG);
             }
             return false;
         }
@@ -99,7 +99,7 @@ public class PlaceItManager {
          * the app can automatically restart the removal if Google Play services
          * can fix the error
          */
-        mRemoveType = GeofenceUtils.REMOVE_TYPE.LIST;
+        mRemoveType = PlaceItUtils.REMOVE_TYPE.LIST;
 
         // Create a List of 1 Geofence with the ID "2" and store it in the global list
         mGeofenceIdsToRemove = Collections.singletonList(placeIt.getId());
@@ -159,7 +159,7 @@ public class PlaceItManager {
          * the app can automatically restart the add request if Google Play services
          * can fix the error
          */
-        mRequestType = GeofenceUtils.REQUEST_TYPE.ADD;
+        mRequestType = PlaceItUtils.REQUEST_TYPE.ADD;
 
         /*
          * Check for Google Play services. Do this after
@@ -189,40 +189,6 @@ public class PlaceItManager {
         }
     }
     
-    /**
-     * Define a DialogFragment to display the error dialog generated in
-     * showErrorDialog.
-     */
-    public static class ErrorDialogFragment extends DialogFragment {
-
-        // Global field to contain the error dialog
-        private Dialog mDialog;
-
-        /**
-         * Default constructor. Sets the dialog field to null
-         */
-        public ErrorDialogFragment() {
-            super();
-            mDialog = null;
-        }
-
-        /**
-         * Set the dialog to display
-         *
-         * @param dialog An error dialog
-         */
-        public void setDialog(Dialog dialog) {
-            mDialog = dialog;
-        }
-
-        /*
-         * This method must return a Dialog to the DialogFragment.
-         */
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            return mDialog;
-        }
-    }
     
     public List<PlaceIt> getActivePlaceIts()
     {
@@ -268,14 +234,14 @@ public class PlaceItManager {
         switch (requestCode) {
 
             // If the request code matches the code sent in onConnectionFailed
-            case GeofenceUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST :
+            case PlaceItUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST :
 
                 switch (resultCode) {
                     // If Google Play services resolved the problem
                     case Activity.RESULT_OK:
 
                         // If the request was to add geofences
-                        if (GeofenceUtils.REQUEST_TYPE.ADD == mRequestType) {
+                        if (PlaceItUtils.REQUEST_TYPE.ADD == mRequestType) {
 
                             // Toggle the request flag and send a new request
                             mGeofenceRequester.setInProgressFlag(false);
@@ -284,13 +250,13 @@ public class PlaceItManager {
                             mGeofenceRequester.addGeofences(mCurrentGeofences);
 
                         // If the request was to remove geofences
-                        } else if (GeofenceUtils.REQUEST_TYPE.REMOVE == mRequestType ){
+                        } else if (PlaceItUtils.REQUEST_TYPE.REMOVE == mRequestType ){
 
                             // Toggle the removal flag and send a new removal request
                             mGeofenceRemover.setInProgressFlag(false);
 
                             // If the removal was by Intent
-                            if (GeofenceUtils.REMOVE_TYPE.INTENT == mRemoveType) {
+                            if (PlaceItUtils.REMOVE_TYPE.INTENT == mRemoveType) {
 
                                 // Restart the removal of all geofences for the PendingIntent
                                 mGeofenceRemover.removeGeofencesByIntent(
@@ -309,18 +275,53 @@ public class PlaceItManager {
                     default:
 
                         // Report that Google Play services was unable to resolve the problem.
-                        Log.d(GeofenceUtils.APPTAG, mContext.getString(R.string.no_resolution));
+                        Log.d(PlaceItUtils.APPTAG, mContext.getString(R.string.no_resolution));
                 }
 
             // If any other request code was received
             default:
                // Report that this Activity received an unknown requestCode
-               Log.d(GeofenceUtils.APPTAG,
+               Log.d(PlaceItUtils.APPTAG,
                        mContext.getString(R.string.unknown_activity_request_code, requestCode));
 
                break;
         }
         
+    }
+
+    /**
+     * Define a DialogFragment to display the error dialog generated in
+     * showErrorDialog.
+     */
+    public static class ErrorDialogFragment extends DialogFragment {
+
+        // Global field to contain the error dialog
+        private Dialog mDialog;
+
+        /**
+         * Default constructor. Sets the dialog field to null
+         */
+        public ErrorDialogFragment() {
+            super();
+            mDialog = null;
+        }
+
+        /**
+         * Set the dialog to display
+         *
+         * @param dialog An error dialog
+         */
+        public void setDialog(Dialog dialog) {
+            mDialog = dialog;
+        }
+
+        /*
+         * This method must return a Dialog to the DialogFragment.
+         */
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            return mDialog;
+        }
     }
 
 }
