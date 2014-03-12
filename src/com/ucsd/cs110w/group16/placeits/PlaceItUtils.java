@@ -123,8 +123,8 @@ public final class PlaceItUtils {
 
     public static final CharSequence GEOFENCE_ID_DELIMITER = ",";
 
-    public static final float DEFAULT_RADIUS = 804.5f;    
-    public static final float MAX_DISTANCE = 1609.3f;
+    public static final float DEFAULT_RADIUS = 800f;    
+    public static final float MAX_DISTANCE = DEFAULT_RADIUS;
     public static final long MAX_TIME = 15000;
 
     public static final String CONSTRUCTED_LOCATION_PROVIDER = "CONSTRUCTED_LOCATION_PROVIDER";
@@ -132,15 +132,25 @@ public final class PlaceItUtils {
     public static final String PLACES_API_KEY = "&key=AIzaSyCgLlnD_HaVJd4Cla4C9hRHd7ZIME86kZA";
 
     public static final String PLACES_LIST_BASE_URI = "https://maps.googleapis.com/maps/api/place/search/xml?sensor=true";
-
+    
+    // The location update distance for passive updates.
+    public static float PASSIVE_MAX_DISTANCE = MAX_DISTANCE;
+    // The location update time for passive updates
+    public static long PASSIVE_MAX_TIME = MAX_TIME;
+    
+    public static String ACTIVE_LOCATION_UPDATE_PROVIDER_DISABLED = "com.ucsd.cs110w.group16.placeits.active_location_update_provider_disabled";
     public static final String EXTRA_KEY_FORCEREFRESH = "force_refresh";
     public static final String EXTRA_KEY_LOCATION = "location";
     public static final String EXTRA_KEY_RADIUS = "radius";
+    public static final String EXTRA_KEY_IN_BACKGROUND = "EXTRA_KEY_IN_BACKGROUND";
+
     
     public static final String SP_KEY_LAST_LIST_UPDATE_TIME = "SP_KEY_LAST_LIST_UPDATE_TIME";
     public static final String SP_KEY_LAST_LIST_UPDATE_LAT = "SP_KEY_LAST_LIST_UPDATE_LAT";
     public static final String SP_KEY_LAST_LIST_UPDATE_LNG = "SP_KEY_LAST_LIST_UPDATE_LNG";
+    public static final String SP_KEY_RUN_ONCE = "SP_KEY_RUN_ONCE";
 
+    
     
 
     

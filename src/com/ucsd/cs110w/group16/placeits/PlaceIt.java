@@ -108,6 +108,8 @@ public class PlaceIt
 	
 }*/
 
+import android.location.Location;
+
 import com.google.android.gms.location.Geofence;
 
 /**
@@ -119,13 +121,14 @@ public class PlaceIt {
     private final String mId;
     private final Integer intId;
     private final String title;
-    private final String desc;
-    private final double mLatitude;
-    private final double mLongitude;
-    private final float mRadius = PlaceItUtils.DEFAULT_RADIUS;
+    private String desc;
+    private double mLatitude;
+    private double mLongitude;
+    private final float mRadius = 804.5f;
     private long mExpirationDuration = Geofence.NEVER_EXPIRE;
     private int mTransitionType = Geofence.GEOFENCE_TRANSITION_ENTER;
     private boolean isActive;
+    private boolean isCategory;
 
     /**
      * @param geofenceId The Geofence's request ID
@@ -142,7 +145,8 @@ public class PlaceIt {
             String desc,
             double latitude,
             double longitude,
-            boolean isActive) {
+            boolean isActive,
+            boolean isCategory) {
         // Set the instance fields from the constructor
 
         // An identifier for the geofence
@@ -155,6 +159,8 @@ public class PlaceIt {
         this.title = title;
         this.desc = desc;
         this.isActive = isActive;
+        
+        this.isCategory = isCategory;
     }
     // Instance field getters
 
@@ -222,10 +228,22 @@ public class PlaceIt {
         return isActive;
     }
     
+    public boolean isCategory() {
+        return isCategory;
+    }
     public void setStatus(boolean status){
     	isActive = status;
     }
-
+    public void setCategory(boolean category) {
+        isCategory = category;
+    }
+    public void setLocation(Location loc) {
+        this.mLatitude = loc.getLatitude();
+        this.mLongitude = loc.getLongitude();
+    }
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
     /**
      * Creates a Location Services Geofence object from a
      * PlaceIt.

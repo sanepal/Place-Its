@@ -1,26 +1,12 @@
 package com.ucsd.cs110w.group16.placeits;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-
-import android.location.Address;
-import android.os.Bundle;
-import android.os.Handler;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -28,6 +14,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.location.Address;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -42,21 +38,42 @@ import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 public class MainActivity extends Activity implements OnMapClickListener,
-OnMarkerClickListener, OnConnectionFailedListener {
+        OnMarkerClickListener, OnConnectionFailedListener {
     private GoogleMap map;
     private Marker searchResult = null;
     private MenuItem searchItem;
-    private CameraPositionStore mPrefs;
+    // gets the camera preferences from shared preferences
+    private CameraPositionStore cPrefs;
     private PlaceItManager placeItManager;
+
+    private SharedPreferences prefs;
+    private Editor prefsEditor;
+
+    private LocationManager locationManager;
+
+    private Criteria criteria;
+    private LocationUpdateRequester locationUpdateRequester;
+    private LastLocationFinder lastLocationFinder;
+    private PendingIntent locationListenerPendingIntent;
+    private PendingIntent locationListenerPassivePendingIntent;
 
     private int selected = 0;
 
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-
-    ArrayList<Integer> alarmCancelList; // List to hold Id's of alarms to
-    // cancel.
-    BroadcastReceiver alarmReceiver; // Receiver to receive alarms.
 
     /*
      * An instance of an inner class that receives broadcasts from listeners and
@@ -97,7 +114,39 @@ OnMarkerClickListener, OnConnectionFailedListener {
 
         // All Location Services sample apps use this category
         mIntentFilter.addCategory(PlaceItUtils.CATEGORY_LOCATION_SERVICES);
-        mPrefs = new CameraPositionStore(this);
+
+        prefs = getSharedPreferences(PlaceItUtils.SHARED_PREFERENCE_FILE,
+                Context.MODE_PRIVATE);
+        prefsEditor = prefs.edit();
+
+        prefsEditor.putBoolean(PlaceItUtils.SP_KEY_RUN_ONCE, true).commit();
+
+        // get reference to manager
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        // specify crteria for requesting updates
+        criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+
+        // location update intents
+        Intent activeIntent = new Intent(this, LocationChangedReceiver.class);
+        locationListenerPendingIntent = PendingIntent.getBroadcast(this, 0,
+                activeIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Intent passiveIntent = new Intent(this,
+                PassiveLocationChangedReceiver.class);
+        locationListenerPassivePendingIntent = PendingIntent.getBroadcast(this,
+                0, passiveIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // instantiate last location finder and location update requester
+
+        lastLocationFinder = new LastLocationFinder(this);
+        lastLocationFinder
+                .setChangedLocationListener(oneShotLastLocationUpdateListener);
+
+        locationUpdateRequester = new LocationUpdateRequester(locationManager);
+
+        cPrefs = new CameraPositionStore(this);
         placeItManager = new PlaceItManager(this);
         setUpMapIfNeeded();
         displayActivePlaceIts();
@@ -105,24 +154,6 @@ OnMarkerClickListener, OnConnectionFailedListener {
         map.setOnMapClickListener(this);
         map.setOnMarkerClickListener(this);
         handleIntent(getIntent());
-    }
-
-    private void displayActivePlaceIts() {
-        map.clear();
-        List<PlaceIt> activePlaceIts = placeItManager.getActivePlaceIts();
-        for (PlaceIt placeIt : activePlaceIts) {
-            map.addMarker(
-                    new MarkerOptions()
-                    .position(
-                            new LatLng(placeIt.getLatitude(), placeIt
-                                    .getLongitude()))
-                                    .title(placeIt.getTitle())
-                                    .snippet(placeIt.getDesc()))
-                                    .setIcon(
-                                            BitmapDescriptorFactory
-                                            .fromResource(R.drawable.ic_placeit));
-        }
-
     }
 
     /*
@@ -138,13 +169,6 @@ OnMarkerClickListener, OnConnectionFailedListener {
             Intent intent) {
 
         placeItManager.handleActivityResult(requestCode, resultCode, intent);
-    }
-
-    private void setUpMapIfNeeded() {
-        if (map == null) {
-            map = ((MapFragment) getFragmentManager()
-                    .findFragmentById(R.id.map)).getMap();
-        }
     }
 
     @Override
@@ -184,12 +208,17 @@ OnMarkerClickListener, OnConnectionFailedListener {
     @Override
     protected void onResume() {
         super.onResume();
+        prefsEditor.putBoolean(PlaceItUtils.EXTRA_KEY_IN_BACKGROUND, false)
+                .commit();
         // Register the broadcast receiver to receive status updates
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 mBroadcastReceiver, mIntentFilter);
-        map.animateCamera(CameraUpdateFactory.newCameraPosition(mPrefs
+        // animate camera to last location
+        map.animateCamera(CameraUpdateFactory.newCameraPosition(cPrefs
                 .getCameraPosition()), 18, null);
+        // out place its one map again
         displayActivePlaceIts();
+        getLocationAndUpdatePlaces(true);
     }
 
     /*
@@ -200,7 +229,8 @@ OnMarkerClickListener, OnConnectionFailedListener {
     @Override
     protected void onPause() {
         super.onPause();
-        mPrefs.setCameraPosition(map.getCameraPosition());
+        prefsEditor.putBoolean(PlaceItUtils.EXTRA_KEY_IN_BACKGROUND, true).commit();
+        cPrefs.setCameraPosition(map.getCameraPosition());
     }
 
     @Override
@@ -230,10 +260,10 @@ OnMarkerClickListener, OnConnectionFailedListener {
             PlaceIt placeIt = placeItManager.getPlaceIt((long) intent
                     .getExtras().getInt("PlaceItId"));
             Marker marker = map.addMarker(new MarkerOptions()
-            .position(
-                    new LatLng(placeIt.getLatitude(), placeIt
-                            .getLongitude())).title(placeIt.getTitle())
-                            .snippet(placeIt.getDesc()));
+                    .position(
+                            new LatLng(placeIt.getLatitude(), placeIt
+                                    .getLongitude())).title(placeIt.getTitle())
+                    .snippet(placeIt.getDesc()));
             map.animateCamera(CameraUpdateFactory
                     .newCameraPosition(new CameraPosition(marker.getPosition(),
                             5, 0, 0)), 5, null);
@@ -241,27 +271,168 @@ OnMarkerClickListener, OnConnectionFailedListener {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        // Associate searchable configuration with the SearchView
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        searchItem = menu.findItem(R.id.action_search);
-        SearchView searchView = (SearchView) searchItem.getActionView();
-        searchView.setSearchableInfo(searchManager
-                .getSearchableInfo(getComponentName()));
-        return true;
+    private void getLocationAndUpdatePlaces(boolean updateWhenLocationChanges) {
+        // This isn't directly affecting the UI, so put it on a worker thread.
+        AsyncTask<Void, Void, Void> findLastLocationTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                // Find the last known location, specifying a required accuracy
+                // of within the min distance between updates
+                // and a required latency of the minimum time required between
+                // updates.
+                Location lastKnownLocation = lastLocationFinder
+                        .getLastBestLocation(PlaceItUtils.MAX_DISTANCE,
+                                System.currentTimeMillis()
+                                        - PlaceItUtils.MAX_TIME);
+
+                // Update the place list based on the last known location within
+                // a defined radius.
+                // Note that this is *not* a forced update. The Place List
+                // Service has settings to
+                // determine how frequently the underlying web service should be
+                // pinged. This function
+                // is called everytime the Activity becomes active, so we don't
+                // want to flood the server
+                // unless the location has changed or a minimum latency or
+                // distance has been covered.
+                // TODO Modify the search radius based on user settings?
+                updatePlaces(lastKnownLocation,
+                        (int) PlaceItUtils.DEFAULT_RADIUS, false);
+                return null;
+            }
+        };
+        findLastLocationTask.execute();
+
+        // If we have requested location updates, turn them on here.
+        // toggleUpdatesWhenLocationChanges(updateWhenLocationChanges);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-        case R.id.action_placeits:
-            displayPlaceitsList();
-            return true;
+    /**
+     * Start listening for location updates.
+     */
+    protected void requestLocationUpdates() {
+        // Normal updates while activity is visible.
+        locationUpdateRequester.requestLocationUpdates(PlaceItUtils.MAX_TIME,
+                (long) PlaceItUtils.MAX_DISTANCE, criteria,
+                locationListenerPendingIntent);
+
+        // Passive location updates from 3rd party apps when the Activity isn't
+        // visible.
+        locationUpdateRequester.requestPassiveLocationUpdates(
+                PlaceItUtils.PASSIVE_MAX_TIME,
+                (long) PlaceItUtils.PASSIVE_MAX_DISTANCE,
+                locationListenerPassivePendingIntent);
+
+        // Register a receiver that listens for when the provider I'm using has
+        // been disabled.
+        IntentFilter intentFilter = new IntentFilter(
+                PlaceItUtils.ACTIVE_LOCATION_UPDATE_PROVIDER_DISABLED);
+        registerReceiver(locProviderDisabledReceiver, intentFilter);
+
+        // Register a receiver that listens for when a better provider than I'm
+        // using becomes available.
+        String bestProvider = locationManager.getBestProvider(criteria, false);
+        String bestAvailableProvider = locationManager.getBestProvider(
+                criteria, true);
+        if (bestProvider != null && !bestProvider.equals(bestAvailableProvider)) {
+            locationManager.requestLocationUpdates(bestProvider, 0, 0,
+                    bestInactiveLocationProviderListener, getMainLooper());
         }
-        return false;
+    }
+
+    /**
+     * One-off location listener that receives updates from the
+     * {@link LastLocationFinder}. This is triggered where the last known
+     * location is outside the bounds of our maximum distance and latency.
+     */
+    protected LocationListener oneShotLastLocationUpdateListener = new LocationListener() {
+        public void onLocationChanged(Location l) {
+            updatePlaces(l, PlaceItUtils.DEFAULT_RADIUS, true);
+        }
+
+        public void onProviderDisabled(String provider) {
+        }
+
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+        }
+
+        public void onProviderEnabled(String provider) {
+        }
+    };
+
+    /**
+     * If the best Location Provider (usually GPS) is not available when we
+     * request location updates, this listener will be notified if / when it
+     * becomes available. It calls requestLocationUpdates to re-register the
+     * location listeners using the better Location Provider.
+     */
+    protected LocationListener bestInactiveLocationProviderListener = new LocationListener() {
+        public void onLocationChanged(Location l) {
+        }
+
+        public void onProviderDisabled(String provider) {
+        }
+
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+        }
+
+        public void onProviderEnabled(String provider) {
+            // Re-register the location listeners using the better Location
+            // Provider.
+            requestLocationUpdates();
+        }
+    };
+
+    /**
+     * If the Location Provider we're using to receive location updates is
+     * disabled while the app is running, this Receiver will be notified,
+     * allowing us to re-register our Location Receivers using the best
+     * available Location Provider is still available.
+     */
+    protected BroadcastReceiver locProviderDisabledReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean providerDisabled = !intent.getBooleanExtra(
+                    LocationManager.KEY_PROVIDER_ENABLED, false);
+            // Re-register the location listeners using the best available
+            // Location Provider.
+            if (providerDisabled)
+                requestLocationUpdates();
+        }
+    };
+
+    /**
+     * Update the list of nearby places centered on the specified Location,
+     * within the specified radius. This will start the
+     * {@link PlacesUpdateService} that will poll the underlying web service.
+     * 
+     * @param location
+     *            Location
+     * @param radius
+     *            Radius (meters)
+     * @param forceRefresh
+     *            Force Refresh
+     */
+    protected void updatePlaces(Location location, float radius,
+            boolean forceRefresh) {
+        if (location != null) {
+            Log.d(PlaceItUtils.APPTAG, "Updating place list.");
+            // Start the PlacesUpdateService. Note that we use an action rather
+            // than specifying the
+            // class directly. That's because we have different variations of
+            // the Service for different
+            // platform versions.
+            Intent updateServiceIntent = new Intent(this,
+                    PlacesUpdateService.class);
+            updateServiceIntent.putExtra(PlaceItUtils.EXTRA_KEY_LOCATION,
+                    location);
+            updateServiceIntent.putExtra(PlaceItUtils.EXTRA_KEY_RADIUS, radius);
+            updateServiceIntent.putExtra(PlaceItUtils.EXTRA_KEY_FORCEREFRESH,
+                    forceRefresh);
+            startService(updateServiceIntent);            
+        } else
+            Log.d(PlaceItUtils.APPTAG,
+                    "Updating place list for: No Previous Location Found");
     }
 
     /*
@@ -293,9 +464,9 @@ OnMarkerClickListener, OnConnectionFailedListener {
                 searchResult = map.addMarker(new MarkerOptions().position(
                         new LatLng(results.get(which).getLatitude(), results
                                 .get(which).getLongitude())).title(
-                                        results.get(which).getFeatureName() != null ? results
-                                                .get(which).getFeatureName() : results.get(
-                                                        which).getAddressLine(0)));
+                        results.get(which).getFeatureName() != null ? results
+                                .get(which).getFeatureName() : results.get(
+                                which).getAddressLine(0)));
                 searchResult.showInfoWindow();
 
             }
@@ -320,12 +491,12 @@ OnMarkerClickListener, OnConnectionFailedListener {
         builder.setSingleChoiceItems(R.array.choices, selected,
                 new DialogInterface.OnClickListener() {
 
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                selected = which;
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        selected = which;
 
-            }
-        });
+                    }
+                });
         builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -365,20 +536,20 @@ OnMarkerClickListener, OnConnectionFailedListener {
             builder.setMessage("Create Place It for " + marker.getTitle() + "?");
             builder.setPositiveButton("YES",
                     new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    showSingleInputDialog(marker.getPosition());
-                }
-            });
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            showSingleInputDialog(marker.getPosition());
+                        }
+                    });
             builder.setNegativeButton("NO",
                     new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    // Code that is executed when clicking NO
-                    dialog.dismiss();
-                }
-            });
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Code that is executed when clicking NO
+                            dialog.dismiss();
+                        }
+                    });
             AlertDialog alert = builder.create();
             alert.show();
             marker.remove();
@@ -408,28 +579,28 @@ OnMarkerClickListener, OnConnectionFailedListener {
         builder.setTitle("Enter your details");
         builder.setPositiveButton("Save",
                 new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                map.addMarker(new MarkerOptions()
-                .position(location)
-                .title(inputTitle.getText().toString())
-                .snippet(inputDesc.getText().toString())
-                .icon(BitmapDescriptorFactory
-                        .fromResource(R.drawable.ic_placeit)));
-                placeItManager.registerGeofence((placeItManager
-                        .createPlaceIt(inputTitle.getText().toString(),
-                                inputDesc.getText().toString(),
-                                location)));
-            }
-        });
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        map.addMarker(new MarkerOptions()
+                                .position(location)
+                                .title(inputTitle.getText().toString())
+                                .snippet(inputDesc.getText().toString())
+                                .icon(BitmapDescriptorFactory
+                                        .fromResource(R.drawable.ic_placeit)));
+                        placeItManager.registerGeofence((placeItManager
+                                .createPlaceIt(inputTitle.getText().toString(),
+                                        inputDesc.getText().toString(),
+                                        location)));
+                    }
+                });
         builder.setNegativeButton("Cancel",
                 new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
         AlertDialog dialog = builder.create();
         dialog.show();
     }
@@ -446,44 +617,51 @@ OnMarkerClickListener, OnConnectionFailedListener {
         View layout = inflater.inflate(R.layout.input_category,
                 (ViewGroup) findViewById(R.id.category_root));
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        final Spinner option = (Spinner)layout.findViewById(R.id.option_1);
-        final Spinner option2 = (Spinner)layout.findViewById(R.id.option_2);
-        final Spinner option3 = (Spinner)layout.findViewById(R.id.option_3);
+        final Spinner option = (Spinner) layout.findViewById(R.id.option_1);
+        final Spinner option2 = (Spinner) layout.findViewById(R.id.option_2);
+        final Spinner option3 = (Spinner) layout.findViewById(R.id.option_3);
         builder.setView(layout);
         builder.setTitle("Enter your details");
         builder.setPositiveButton("Save",
                 new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {                
-                String input = option.getSelectedItem().toString();
-                String input2 = option2.getSelectedItem().toString();
-                String input3 = option3.getSelectedItem().toString();
-                Log.d(PlaceItUtils.APPTAG, ""+input);                
-                if (input.isEmpty() && input2.isEmpty() && input3.isEmpty() ) {  
-                    Log.d(PlaceItUtils.APPTAG, "none");
-                    Toast.makeText(getBaseContext(), "Select at least 1 category", Toast.LENGTH_LONG).show();
-                    dialog.dismiss();
-                    Handler handler = new Handler();
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            showCategoricalInputDialog();
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String input = option.getSelectedItem().toString();
+                        String input2 = option2.getSelectedItem().toString();
+                        String input3 = option3.getSelectedItem().toString();
+                        if (input.isEmpty() && input2.isEmpty()
+                                && input3.isEmpty()) {
+                            Log.d(PlaceItUtils.APPTAG, "none");
+                            Toast.makeText(getBaseContext(),
+                                    "Select at least 1 category",
+                                    Toast.LENGTH_LONG).show();
+                            dialog.dismiss();
+                            Handler handler = new Handler();
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    showCategoricalInputDialog();
+                                }
+                            });
+                        } else {
+                            String categories = input;
+                            if (!input2.isEmpty())
+                                categories += ", "+input2;
+                            if (!input3.isEmpty())
+                                categories += ", "+input3;
+                            placeItManager.createCategoryPlaceIt(categories);
+                            getLocationAndUpdatePlaces(true);
                         }
-                    });
-                }
-                else {
-                    //create categorical place it
-                }
-                dialog.dismiss();
-            }
-        });
+                        dialog.dismiss();
+                    }
+                });
         builder.setNegativeButton("Cancel",
                 new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
         AlertDialog dialog = builder.create();
         dialog.show();
     }
@@ -495,6 +673,56 @@ OnMarkerClickListener, OnConnectionFailedListener {
     private void displayPlaceitsList() {
         Intent intent = new Intent(this, ListActivity.class);
         startActivity(intent);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        searchItem = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) searchItem.getActionView();
+        searchView.setSearchableInfo(searchManager
+                .getSearchableInfo(getComponentName()));
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case R.id.action_placeits:
+            displayPlaceitsList();
+            return true;
+        }
+        return false;
+    }
+
+    private void setUpMapIfNeeded() {
+        if (map == null) {
+            map = ((MapFragment) getFragmentManager()
+                    .findFragmentById(R.id.map)).getMap();
+        }
+    }
+
+    private void displayActivePlaceIts() {
+        map.clear();
+        List<PlaceIt> activePlaceIts = placeItManager.getActivePlaceIts();
+        for (PlaceIt placeIt : activePlaceIts) {
+            if (placeIt.isCategory())
+                continue;
+            map.addMarker(
+                    new MarkerOptions()
+                            .position(
+                                    new LatLng(placeIt.getLatitude(), placeIt
+                                            .getLongitude()))
+                            .title(placeIt.getTitle())
+                            .snippet(placeIt.getDesc()))
+                    .setIcon(
+                            BitmapDescriptorFactory
+                                    .fromResource(R.drawable.ic_placeit));
+        }
+
     }
 
     /**

@@ -13,11 +13,12 @@ public class PlaceItDatabaseHelper extends SQLiteOpenHelper {
 	public static final String COLUMN_NAME = "name";
 	public static final String COLUMN_DESCRIPTION = "description";
 	public static final String COLUMN_STATUS = "status";
+	public static final String COLUMN_CATEGORY = "category";
 	public static final String[] ALL_COLUMNS = {COLUMN_ID, COLUMN_LATITUDE, COLUMN_LONGITUDE,
-		COLUMN_NAME, COLUMN_DESCRIPTION, COLUMN_STATUS};
+		COLUMN_NAME, COLUMN_DESCRIPTION, COLUMN_STATUS, COLUMN_CATEGORY};
 	
 	private static final String DATABASE_NAME = "placeits.db";
-	private static final int DATABASE_VERSION = 1;
+	private static final int DATABASE_VERSION = 2;
 	
 	private static final String SQL_CREATE_TABLE = "CREATE TABLE " + TABLE_NAME
 			+ "(" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -25,7 +26,8 @@ public class PlaceItDatabaseHelper extends SQLiteOpenHelper {
 			+ COLUMN_LONGITUDE + " REAL, "
 			+ COLUMN_NAME + " TEXT NOT NULL, "
 			+ COLUMN_DESCRIPTION + " TEXT NOT NULL, "
-			+ COLUMN_STATUS + " INTEGER)";
+			+ COLUMN_STATUS + " INTEGER,"
+			+ COLUMN_CATEGORY+ " TEXT NOT NULL)";
 	private static final String SQL_DELETE_TABLE = "DROP TABLE IF EXISTS " + TABLE_NAME;
 	
 	public PlaceItDatabaseHelper(Context context) {

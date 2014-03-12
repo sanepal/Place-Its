@@ -27,7 +27,7 @@ public class PlaceItDatabase {
 	}
 	
 	public PlaceIt createPlaceIt(double latitude, double longitude, String name,
-			String description, boolean active) {
+			String description, boolean active, boolean category) {
 		// Add values to key/value pair object.
 		ContentValues values = new ContentValues();
 		values.put(PlaceItDatabaseHelper.COLUMN_LATITUDE, latitude);
@@ -35,6 +35,7 @@ public class PlaceItDatabase {
 		values.put(PlaceItDatabaseHelper.COLUMN_NAME, name);
 		values.put(PlaceItDatabaseHelper.COLUMN_DESCRIPTION, description);
 		values.put(PlaceItDatabaseHelper.COLUMN_STATUS, active);
+		values.put(PlaceItDatabaseHelper.COLUMN_CATEGORY, category);
 		
 		// Open the database
 		open();
@@ -67,6 +68,7 @@ public class PlaceItDatabase {
 		values.put(PlaceItDatabaseHelper.COLUMN_NAME, placeIt.getTitle());
 		values.put(PlaceItDatabaseHelper.COLUMN_DESCRIPTION, placeIt.getDesc());
 		values.put(PlaceItDatabaseHelper.COLUMN_STATUS, placeIt.isActive());
+		values.put(PlaceItDatabaseHelper.COLUMN_CATEGORY, placeIt.isCategory());
 		
 		// Update the values in the database.
 		open();
@@ -132,6 +134,29 @@ public class PlaceItDatabase {
 		return placeIts;
 	}
 	
+	public List<PlaceIt> getAllCategory() {
+List<PlaceIt> placeIts = new ArrayList<PlaceIt>();
+        
+        // Open the database
+        open();
+        
+        // Return all rows with matching status value.
+        Cursor cursor = database.query(PlaceItDatabaseHelper.TABLE_NAME, PlaceItDatabaseHelper.ALL_COLUMNS,
+                PlaceItDatabaseHelper.COLUMN_CATEGORY + "= 1", null, null, null, PlaceItDatabaseHelper.COLUMN_ID+" DESC");
+        
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            PlaceIt placeIt = cursorToPlaceIt(cursor);
+            placeIts.add(placeIt);
+            cursor.moveToNext();
+        }
+        cursor.close();
+
+        close(); // should be in activity's onDelete instead?
+        
+        return placeIts;
+	}
+	
 	private PlaceIt cursorToPlaceIt(Cursor cursor) {
 		// Create new object and fill with values from the database.
 		PlaceIt placeIt = new PlaceIt(
@@ -140,7 +165,8 @@ public class PlaceItDatabase {
 		        cursor.getString(4),
 		        cursor.getDouble(1),
 		        cursor.getDouble(2),
-		        cursor.getInt(5) == 1
+		        cursor.getInt(5) == 1,
+		        cursor.getInt(6) == 1
 		        );
 		return placeIt;
 	}

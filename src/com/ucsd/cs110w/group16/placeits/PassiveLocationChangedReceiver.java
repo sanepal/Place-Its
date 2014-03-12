@@ -52,40 +52,41 @@ public class PassiveLocationChangedReceiver extends BroadcastReceiver {
             // directly.
             location = (Location) intent.getExtras().get(key);
         } else {
-            /*
-             * // This update came from a recurring alarm. We need to determine
-             * if there // has been a more recent Location received than the
-             * last location we used.
-             * 
-             * // Get the best last location detected from the providers.
-             * LegacyLastLocationFinder lastLocationFinder = new
-             * LegacyLastLocationFinder(context); location =
-             * lastLocationFinder.getLastBestLocation(PlaceItUtils.MAX_DISTANCE,
-             * System.currentTimeMillis()-PlaceItUtils.MAX_TIME);
-             * SharedPreferences prefs =
-             * context.getSharedPreferences(PlaceItUtils.SHARED_PREFERENCE_FILE,
-             * Context.MODE_PRIVATE);
-             * 
-             * // Get the last location we used to get a listing. long lastTime
-             * = prefs.getLong(PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_TIME,
-             * Long.MIN_VALUE); long lastLat =
-             * prefs.getLong(PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_LAT,
-             * Long.MIN_VALUE); long lastLng =
-             * prefs.getLong(PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_LNG,
-             * Long.MIN_VALUE); Location lastLocation = new
-             * Location(PlaceItUtils.CONSTRUCTED_LOCATION_PROVIDER);
-             * lastLocation.setLatitude(lastLat);
-             * lastLocation.setLongitude(lastLng);
-             * 
-             * // Check if the last location detected from the providers is
-             * either too soon, or too close to the last // value we used. If it
-             * is within those thresholds we set the location to null to prevent
-             * the update // Service being run unnecessarily (and spending
-             * battery on data transfers). if ((lastTime >
-             * System.currentTimeMillis()-PlaceItUtils.MAX_TIME) ||
-             * (lastLocation.distanceTo(location) < PlaceItUtils.MAX_DISTANCE))
-             * location = null;
-             */
+
+            // This update came from a recurring alarm. We need to determine
+            // if there has been a more recent Location received than the
+            // last location we used.
+
+            // Get the best last location detected from the providers.
+            LastLocationFinder lastLocationFinder = new LastLocationFinder(
+                    context);
+            location = lastLocationFinder.getLastBestLocation(
+                    PlaceItUtils.MAX_DISTANCE, System.currentTimeMillis()
+                            - PlaceItUtils.MAX_TIME);
+            SharedPreferences prefs = context.getSharedPreferences(
+                    PlaceItUtils.SHARED_PREFERENCE_FILE, Context.MODE_PRIVATE);
+
+            // Get the last location we used to get a listing.
+            long lastTime = prefs.getLong(
+                    PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_TIME, Long.MIN_VALUE);
+            long lastLat = prefs.getLong(
+                    PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_LAT, Long.MIN_VALUE);
+            long lastLng = prefs.getLong(
+                    PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_LNG, Long.MIN_VALUE);
+            Location lastLocation = new Location(
+                    PlaceItUtils.CONSTRUCTED_LOCATION_PROVIDER);
+            lastLocation.setLatitude(lastLat);
+            lastLocation.setLongitude(lastLng);
+
+            // Check if the last location detected from the providers is
+            // either too soon, or too close to the last value we used. If it
+            // is within those thresholds we set the location to null to prevent
+            // the update Service being run unnecessarily (and spending
+            // battery on data transfers).
+            if ((lastTime > System.currentTimeMillis() - PlaceItUtils.MAX_TIME)
+                    || (lastLocation.distanceTo(location) < PlaceItUtils.MAX_DISTANCE))
+                location = null;
+
         }
 
         // Start the Service used to find nearby points of interest based on the

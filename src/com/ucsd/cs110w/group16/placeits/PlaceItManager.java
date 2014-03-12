@@ -139,9 +139,17 @@ public class PlaceItManager {
     public PlaceIt createPlaceIt(String title, String desc, LatLng arg0) {        
 
         //create the place it in our database
-        return mDb.createPlaceIt(arg0.latitude, arg0.longitude, title, desc, true);        
+        return mDb.createPlaceIt(arg0.latitude, arg0.longitude, title, desc, true, false);        
 
         
+    }
+    
+    public PlaceIt createCategoryPlaceIt(String title) {
+        return mDb.createPlaceIt(0, 0, title, "", true, true);
+    }
+    
+    public void updatePlaceIt(PlaceIt mPlaceIt) {
+        mDb.updatePlaceIt(mPlaceIt);
     }
     
     /**
@@ -202,7 +210,10 @@ public class PlaceItManager {
         return inactivePlaceIts;
     }
     
-    
+    public List<PlaceIt> getCategoryPlaceIts() {
+        List<PlaceIt> categoryPlaceIts = mDb.getAllCategory();
+        return categoryPlaceIts;
+    }
     public PlaceIt getPlaceIt(Long id)
     {
         PlaceIt placeIt = mDb.getPlaceIt(id);

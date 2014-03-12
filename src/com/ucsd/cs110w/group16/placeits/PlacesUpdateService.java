@@ -6,6 +6,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -69,10 +70,13 @@ public class PlacesUpdateService extends IntentService {
      * @return Battery is low
      */
     protected boolean getIsLowBattery(Intent battery) {
-        float pctLevel = (float) battery.getIntExtra(
-                BatteryManager.EXTRA_LEVEL, 1)
-                / battery.getIntExtra(BatteryManager.EXTRA_SCALE, 1);
-        return pctLevel < 0.15;
+        /*
+         * float pctLevel = (float) battery.getIntExtra(
+         * BatteryManager.EXTRA_LEVEL, 1) /
+         * battery.getIntExtra(BatteryManager.EXTRA_SCALE, 1); return pctLevel <
+         * 0.15;
+         */
+        return false;
     }
 
     @Override
@@ -92,25 +96,24 @@ public class PlacesUpdateService extends IntentService {
      */
     @Override
     protected void onHandleIntent(Intent intent) {
-        
         // Extract the location and radius around which to conduct our search.
         Location location = new Location(
                 PlaceItUtils.CONSTRUCTED_LOCATION_PROVIDER);
         float radius = PlaceItUtils.DEFAULT_RADIUS;
 
         Bundle extras = intent.getExtras();
-        /*if (intent.hasExtra(PlaceItUtils.EXTRA_KEY_LOCATION)) {
-            location = (Location) (extras
-                    .get(PlaceItUtils.EXTRA_KEY_LOCATION));
+        if (intent.hasExtra(PlaceItUtils.EXTRA_KEY_LOCATION)) {
+            location = (Location) (extras.get(PlaceItUtils.EXTRA_KEY_LOCATION));
             radius = extras.getFloat(PlaceItUtils.EXTRA_KEY_RADIUS,
                     PlaceItUtils.DEFAULT_RADIUS);
-        }*/
-
+        }
         // Check if we're in a low battery situation.
-        IntentFilter batIntentFilter = new IntentFilter(
-                Intent.ACTION_BATTERY_CHANGED);
-        Intent battery = registerReceiver(null, batIntentFilter);
-        lowBattery = getIsLowBattery(battery);
+        /*
+         * IntentFilter batIntentFilter = new IntentFilter(
+         * Intent.ACTION_BATTERY_CHANGED); Intent battery =
+         * registerReceiver(null, batIntentFilter); lowBattery =
+         * getIsLowBattery(battery);
+         */
 
         // Check if we're connected to a data network, and if so - if it's a
         // mobile network.
@@ -177,7 +180,7 @@ public class PlacesUpdateService extends IntentService {
 
                 // If update time and distance bounds have been passed, do an
                 // update.
-                if ((lastLocation.distanceTo(location) > PlaceItUtils.MAX_DISTANCE))
+                if ((lastTime < System.currentTimeMillis()-PlaceItUtils.MAX_TIME) ||(lastLocation.distanceTo(location) > PlaceItUtils.MAX_DISTANCE))
                     doUpdate = true;
             }
 
@@ -187,7 +190,6 @@ public class PlacesUpdateService extends IntentService {
             } else
                 Log.d(TAG, "Place List is fresh: Not refreshing");
 
-            
         }
         Log.d(TAG, "Place List Download Service Complete");
     }
@@ -214,101 +216,108 @@ public class PlacesUpdateService extends IntentService {
         URL url;
 
         try {
-            // TODO iterate over all active category place its
-            // TODO add types from category place it to the url : type1|type2|type3
-            String locationStr = location.getLatitude() + ","
-                    + location.getLongitude();
-            String baseURI = PlaceItUtils.PLACES_LIST_BASE_URI;
-            String placesFeed = baseURI + "&location=" + locationStr
-                    + "&radius=" + radius + PlaceItUtils.PLACES_API_KEY;
-            url = new URL(placesFeed);
+            // iterate over all active category place its
+            
+            List<PlaceIt> categoryPlaceIts = placeItManager
+                    .getCategoryPlaceIts();
+            for (PlaceIt placeIt : categoryPlaceIts) {
+                // add types from category place it to the url :
+                // type1|type2|type3
+                if (!placeIt.isActive())
+                    continue;
+                String categories = placeIt.getTitle();
+                //categories.replace(" ", "");
+                categories = categories.replace(", ", "|");
+                String locationStr = location.getLatitude() + ","
+                        + location.getLongitude();
+                String baseURI = PlaceItUtils.PLACES_LIST_BASE_URI;
+                String placesFeed = baseURI + "&location=" + locationStr
+                        + "&radius=" + radius + PlaceItUtils.PLACES_API_KEY;
+                placesFeed += "&types=" + categories;
+                url = new URL(placesFeed);
+                Log.d(TAG, ""+placesFeed);
 
-            // Open the connection
-            URLConnection connection = url.openConnection();
-            HttpsURLConnection httpConnection = (HttpsURLConnection) connection;
-            int responseCode = httpConnection.getResponseCode();
+                // Open the connection
+                URLConnection connection = url.openConnection();
+                HttpsURLConnection httpConnection = (HttpsURLConnection) connection;
+                int responseCode = httpConnection.getResponseCode();
 
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                // Use the XML Pull Parser to extract each nearby location.
-                // TODO Replace the XML parsing to extract your own place list.
-                InputStream in = httpConnection.getInputStream();
-                XmlPullParserFactory factory = XmlPullParserFactory
-                        .newInstance();
-                factory.setNamespaceAware(true);
-                XmlPullParser xpp = factory.newPullParser();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    InputStream in = httpConnection.getInputStream();
+                    XmlPullParserFactory factory = XmlPullParserFactory
+                            .newInstance();
+                    factory.setNamespaceAware(true);
+                    XmlPullParser xpp = factory.newPullParser();
 
-                xpp.setInput(in, null);
-                int eventType = xpp.getEventType();
-                while (eventType != XmlPullParser.END_DOCUMENT) {
-                    //get the types from category place it
-                    if (eventType == XmlPullParser.START_TAG
-                            && xpp.getName().equals("result")) {
-                        eventType = xpp.next();
-                        String id = "";
-                        String name = "";
-                        String vicinity = "";
-                        String types = "";
-                        String locationLat = "";
-                        String locationLng = "";
-                        String viewport = "";
-                        String icon = "";
-                        String reference = "";
-                        while (!(eventType == XmlPullParser.END_TAG && xpp
-                                .getName().equals("result"))) {
-                            if (eventType == XmlPullParser.START_TAG
-                                    && xpp.getName().equals("name"))
-                                name = xpp.nextText();
-                            else if (eventType == XmlPullParser.START_TAG
-                                    && xpp.getName().equals("vicinity"))
-                                vicinity = xpp.nextText();
-                            else if (eventType == XmlPullParser.START_TAG
-                                    && xpp.getName().equals("type"))
-                                types = types == "" ? xpp.nextText() : types
-                                        + " " + xpp.nextText();
-                            else if (eventType == XmlPullParser.START_TAG
-                                    && xpp.getName().equals("lat"))
-                                locationLat = xpp.nextText();
-                            else if (eventType == XmlPullParser.START_TAG
-                                    && xpp.getName().equals("lng"))
-                                locationLng = xpp.nextText();
-                            else if (eventType == XmlPullParser.START_TAG
-                                    && xpp.getName().equals("icon"))
-                                icon = xpp.nextText();
-                            else if (eventType == XmlPullParser.START_TAG
-                                    && xpp.getName().equals("reference"))
-                                reference = xpp.nextText();
-                            else if (eventType == XmlPullParser.START_TAG
-                                    && xpp.getName().equals("id"))
-                                id = xpp.nextText();
+                    xpp.setInput(in, null);
+                    int eventType = xpp.getEventType();
+                    while (eventType != XmlPullParser.END_DOCUMENT) {
+                        // get the types from category place it
+                        if (eventType == XmlPullParser.START_TAG
+                                && xpp.getName().equals("result")) {
                             eventType = xpp.next();
+                            String name = "";
+                            String vicinity = "";
+                            String types = "";
+                            String locationLat = "";
+                            String locationLng = "";
+                            while (!(eventType == XmlPullParser.END_TAG && xpp
+                                    .getName().equals("result"))) {
+                                if (eventType == XmlPullParser.START_TAG
+                                        && xpp.getName().equals("name"))
+                                    name = xpp.nextText();
+                                else if (eventType == XmlPullParser.START_TAG
+                                        && xpp.getName().equals("vicinity"))
+                                    vicinity = xpp.nextText();
+                                else if (eventType == XmlPullParser.START_TAG
+                                        && xpp.getName().equals("type"))
+                                    types = types == "" ? xpp.nextText()
+                                            : types + " " + xpp.nextText();
+                                else if (eventType == XmlPullParser.START_TAG
+                                        && xpp.getName().equals("lat"))
+                                    locationLat = xpp.nextText();
+                                else if (eventType == XmlPullParser.START_TAG
+                                        && xpp.getName().equals("lng"))
+                                    locationLng = xpp.nextText();
+                                eventType = xpp.next();
+                            }
+                            // create a geofence out of the lat/long if the
+                            // type exists so that it is immediately triggered
+                            Location placeLocation = new Location(
+                                    PlaceItUtils.CONSTRUCTED_LOCATION_PROVIDER);
+                            placeLocation.setLatitude(Double
+                                    .valueOf(locationLat));
+                            placeLocation.setLongitude(Double
+                                    .valueOf(locationLng));
+                            
+                            placeIt.setLocation(placeLocation);
+                            placeIt.setDesc(name + ",\n " + vicinity);
+                            placeItManager.updatePlaceIt(placeIt);
+                            placeItManager.registerGeofence(placeIt);
+                            break;
+                            
                         }
-                        Location placeLocation = new Location(
-                                PlaceItUtils.CONSTRUCTED_LOCATION_PROVIDER);
-                        placeLocation.setLatitude(Double.valueOf(locationLat));
-                        placeLocation.setLongitude(Double.valueOf(locationLng));
-
-                        // TODO check if types contains any types set by the category place it
-                        // TODO create a geofence out of the lat/long if the type exists so that it is immediately triggered
+                        eventType = xpp.next();
                     }
-                    eventType = xpp.next();
-                }
 
-                // Save the last update time and place to the Shared
-                // Preferences.
-                prefsEditor.putLong(
-                        PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_LAT,
-                        (long) location.getLatitude());
-                prefsEditor.putLong(
-                        PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_LNG,
-                        (long) location.getLongitude());
-                prefsEditor.putLong(
-                        PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_TIME,
-                        System.currentTimeMillis());
-                prefsEditor.commit();
-            } else
-                Log.e(TAG,
-                        responseCode + ": "
-                                + httpConnection.getResponseMessage());
+                    
+                } else
+                    Log.e(TAG,
+                            responseCode + ": "
+                                    + httpConnection.getResponseMessage());
+            }
+            // Save the last update time and place to the Shared
+            // Preferences.
+            prefsEditor.putLong(
+                    PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_LAT,
+                    (long) location.getLatitude());
+            prefsEditor.putLong(
+                    PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_LNG,
+                    (long) location.getLongitude());
+            prefsEditor.putLong(
+                    PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_TIME,
+                    System.currentTimeMillis());
+            prefsEditor.commit();
 
         } catch (MalformedURLException e) {
             Log.e(TAG, e.getMessage());
@@ -320,5 +329,4 @@ public class PlacesUpdateService extends IntentService {
         }
     }
 
-    
 }

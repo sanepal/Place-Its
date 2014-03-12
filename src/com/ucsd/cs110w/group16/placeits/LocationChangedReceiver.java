@@ -45,9 +45,9 @@ public class LocationChangedReceiver extends BroadcastReceiver {
         String providerEnabledKey = LocationManager.KEY_PROVIDER_ENABLED;
         if (intent.hasExtra(providerEnabledKey)) {
             if (!intent.getBooleanExtra(providerEnabledKey, true)) {
-                // Intent providerDisabledIntent = new
-                // Intent(PlaceItUtils.ACTIVE_LOCATION_UPDATE_PROVIDER_DISABLED);
-                // context.sendBroadcast(providerDisabledIntent);
+                Intent providerDisabledIntent = new
+                Intent(PlaceItUtils.ACTIVE_LOCATION_UPDATE_PROVIDER_DISABLED);
+                context.sendBroadcast(providerDisabledIntent);
             }
         }
         if (intent.hasExtra(locationKey)) {

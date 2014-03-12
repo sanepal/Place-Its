@@ -31,7 +31,7 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.ucsd.cs110w.group16.placeits.LoginActivity"
-            android:label="@string/title_activity_login"
+            android:label="@string/app_name"
             android:windowSoftInputMode="adjustResize|stateVisible"
             android:noHistory="true" >
             <intent-filter>
@@ -77,7 +77,8 @@
             android:label="@string/app_name" >
         </service>
         <service
-            android:name="com.ucsd.cs110w.group16.placeits.PlaceUpdateService"
+            android:name="com.ucsd.cs110w.group16.placeits.PlacesUpdateService"
+            android:enabled="true"
             android:exported="false" >
             <intent-filter>
                 <action android:name="com.ucsd.cs110w.group16.placeits.placesupdateservice" />
@@ -87,8 +88,7 @@
         <receiver android:name="com.ucsd.cs110w.group16.placeits.LocationChangedReceiver" />
         <receiver android:name="com.ucsd.cs110w.group16.placeits.PassiveLocationChangedReceiver" />
         <receiver
-            android:name="com.ucsd.cs110w.group16.placeits.ConnectivityChangedReceiver"
-            android:enabled="false" >
+            android:name="com.ucsd.cs110w.group16.placeits.ConnectivityChangedReceiver">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
