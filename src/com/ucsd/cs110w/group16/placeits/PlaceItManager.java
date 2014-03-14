@@ -148,8 +148,12 @@ public class PlaceItManager {
         return mDb.createPlaceIt(0, 0, title, "", true, true);
     }*/
     
-    public PlaceIt createCategoryPlaceIt(String title, String desc, String categories){
+    /*public PlaceIt createCategoryPlaceIt(String title, String desc, String categories){
     	return mDb.createPlaceIt(title, desc, true, categories);
+    }*/
+    
+    public PlaceIt createCategoryPlaceIt(String title, String categories){
+    	return mDb.createPlaceIt(title, " ", true, categories);
     }
     
     public void updatePlaceIt(PlaceIt mPlaceIt) {

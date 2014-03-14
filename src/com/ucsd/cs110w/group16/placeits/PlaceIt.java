@@ -299,8 +299,8 @@ public class PlaceIt {
     @Override
     public String toString() {
     	if (isCategory)
-    		return categories + "\n(" + mLatitude + ", " + mLongitude + ")";
+    		return title + ": " + categories + "\n" + desc + "\n(" + mLatitude + ", " + mLongitude + ")";
     	else
-    		return title + "\n" + desc;
+    		return title + ": " + desc + "\n(" + mLatitude + ", " + mLongitude + ")";
     }
 }

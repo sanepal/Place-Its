@@ -620,8 +620,8 @@ public class MainActivity extends Activity implements OnMapClickListener,
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         final EditText inputTitle = (EditText) layout
                 .findViewById(R.id.input_title);
-        final EditText inputDesc = (EditText) layout
-                .findViewById(R.id.input_desc);
+        /*final EditText inputDesc = (EditText) layout
+                .findViewById(R.id.input_desc);*/
         final Spinner option = (Spinner) layout.findViewById(R.id.option_1);
         final Spinner option2 = (Spinner) layout.findViewById(R.id.option_2);
         final Spinner option3 = (Spinner) layout.findViewById(R.id.option_3);
@@ -655,7 +655,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
                             if (!input3.isEmpty())
                                 categories += ", "+input3;
                             placeItManager.createCategoryPlaceIt(inputTitle.getText().toString(),
-                            		 inputDesc.getText().toString(),categories);
+                            		 /*inputDesc.getText().toString(),*/categories);
                             getLocationAndUpdatePlaces(true);
                         }
                         dialog.dismiss();
