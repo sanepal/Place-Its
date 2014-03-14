@@ -27,7 +27,7 @@ public class PlaceItDatabase {
 	}
 	
 	public PlaceIt createPlaceIt(double latitude, double longitude, String name,
-			String description, boolean active, boolean category) {
+			String description, boolean active) {
 		// Add values to key/value pair object.
 		ContentValues values = new ContentValues();
 		values.put(PlaceItDatabaseHelper.COLUMN_LATITUDE, latitude);
@@ -35,7 +35,43 @@ public class PlaceItDatabase {
 		values.put(PlaceItDatabaseHelper.COLUMN_NAME, name);
 		values.put(PlaceItDatabaseHelper.COLUMN_DESCRIPTION, description);
 		values.put(PlaceItDatabaseHelper.COLUMN_STATUS, active);
-		values.put(PlaceItDatabaseHelper.COLUMN_CATEGORY, category);
+		values.put(PlaceItDatabaseHelper.COLUMN_CATEGORY, false);
+		values.put(PlaceItDatabaseHelper.COLUMN_CATEGORIES, (String)null);
+		
+		// Open the database
+		open();
+		
+		// Insert values into database and get the ID.
+		Integer insertID = (int) database.insert(PlaceItDatabaseHelper.TABLE_NAME, null, values);
+		
+		// Retrieve the new entry from the database.
+		Cursor cursor = database.query(PlaceItDatabaseHelper.TABLE_NAME,
+				PlaceItDatabaseHelper.ALL_COLUMNS, PlaceItDatabaseHelper.COLUMN_ID + "=" + insertID,
+				null, null, null, null);
+		
+		// Convert the new entry to a PlaceIt object.
+		cursor.moveToFirst();
+		PlaceIt placeIt = cursorToPlaceIt(cursor);
+		cursor.close();
+		
+		// Close the database - should be in activity's onDelete instead?
+		close();
+		
+		return placeIt;
+	}
+	
+	// Create a category place it
+	public PlaceIt createPlaceIt(String name,
+			String description, boolean active, String categories) {
+		// Add values to key/value pair object.
+		ContentValues values = new ContentValues();
+		values.put(PlaceItDatabaseHelper.COLUMN_LATITUDE, 0.);
+		values.put(PlaceItDatabaseHelper.COLUMN_LONGITUDE, 0.);
+		values.put(PlaceItDatabaseHelper.COLUMN_NAME, name);
+		values.put(PlaceItDatabaseHelper.COLUMN_DESCRIPTION, description);
+		values.put(PlaceItDatabaseHelper.COLUMN_STATUS, active);
+		values.put(PlaceItDatabaseHelper.COLUMN_CATEGORY, true);
+		values.put(PlaceItDatabaseHelper.COLUMN_CATEGORIES, categories);
 		
 		// Open the database
 		open();
@@ -69,6 +105,7 @@ public class PlaceItDatabase {
 		values.put(PlaceItDatabaseHelper.COLUMN_DESCRIPTION, placeIt.getDesc());
 		values.put(PlaceItDatabaseHelper.COLUMN_STATUS, placeIt.isActive());
 		values.put(PlaceItDatabaseHelper.COLUMN_CATEGORY, placeIt.isCategory());
+		values.put(PlaceItDatabaseHelper.COLUMN_CATEGORIES, placeIt.getCategories());
 		
 		// Update the values in the database.
 		open();
@@ -166,7 +203,8 @@ List<PlaceIt> placeIts = new ArrayList<PlaceIt>();
 		        cursor.getDouble(1),
 		        cursor.getDouble(2),
 		        cursor.getInt(5) == 1,
-		        cursor.getInt(6) == 1
+		        cursor.getInt(6) == 1,
+		        cursor.getString(7)
 		        );
 		return placeIt;
 	}

@@ -129,6 +129,7 @@ public class PlaceIt {
     private int mTransitionType = Geofence.GEOFENCE_TRANSITION_ENTER;
     private boolean isActive;
     private boolean isCategory;
+    private String categories;
 
     /**
      * @param geofenceId The Geofence's request ID
@@ -161,6 +162,34 @@ public class PlaceIt {
         this.isActive = isActive;
         
         this.isCategory = isCategory;
+        this.categories = null;
+    }
+    
+    public PlaceIt(
+    		Integer geofenceId,
+    		String title,
+    		String desc,
+    		double latitude,
+    		double longitude,
+    		boolean isActive,
+    		boolean isCategory,
+    		String categories)
+    {
+        // Set the instance fields from the constructor
+
+        // An identifier for the geofence
+        this.mId = geofenceId.toString();
+        this.intId = geofenceId;
+        // Center of the geofence
+        this.mLatitude = latitude;
+        this.mLongitude = longitude;
+
+        this.title = title;
+        this.desc = desc;
+        this.isActive = isActive;
+        
+        this.isCategory = isCategory;
+        this.categories = categories;
     }
     // Instance field getters
 
@@ -231,6 +260,9 @@ public class PlaceIt {
     public boolean isCategory() {
         return isCategory;
     }
+    public String getCategories(){
+    	return categories;
+    }
     public void setStatus(boolean status){
     	isActive = status;
     }
@@ -244,6 +276,7 @@ public class PlaceIt {
     public void setDesc(String desc) {
         this.desc = desc;
     }
+    
     /**
      * Creates a Location Services Geofence object from a
      * PlaceIt.
@@ -265,6 +298,9 @@ public class PlaceIt {
     
     @Override
     public String toString() {
-    	return title + "\n" + desc;
+    	if (isCategory)
+    		return categories + "\n(" + mLatitude + ", " + mLongitude + ")";
+    	else
+    		return title + "\n" + desc;
     }
 }

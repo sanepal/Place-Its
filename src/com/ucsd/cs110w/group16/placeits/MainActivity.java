@@ -485,7 +485,8 @@ public class MainActivity extends Activity implements OnMapClickListener,
 
     @Override
     public void onMapClick(final LatLng location) {
-        selected = 0;
+    	showSingleInputDialog(location);
+        /*selected = 0;
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.prompt);
         builder.setSingleChoiceItems(R.array.choices, selected,
@@ -515,7 +516,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
             }
         });
         AlertDialog alert = builder.create();
-        alert.show();
+        alert.show();*/
     }
 
     /*
@@ -617,6 +618,10 @@ public class MainActivity extends Activity implements OnMapClickListener,
         View layout = inflater.inflate(R.layout.input_category,
                 (ViewGroup) findViewById(R.id.category_root));
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final EditText inputTitle = (EditText) layout
+                .findViewById(R.id.input_title);
+        final EditText inputDesc = (EditText) layout
+                .findViewById(R.id.input_desc);
         final Spinner option = (Spinner) layout.findViewById(R.id.option_1);
         final Spinner option2 = (Spinner) layout.findViewById(R.id.option_2);
         final Spinner option3 = (Spinner) layout.findViewById(R.id.option_3);
@@ -649,7 +654,8 @@ public class MainActivity extends Activity implements OnMapClickListener,
                                 categories += ", "+input2;
                             if (!input3.isEmpty())
                                 categories += ", "+input3;
-                            placeItManager.createCategoryPlaceIt(categories);
+                            placeItManager.createCategoryPlaceIt(inputTitle.getText().toString(),
+                            		 inputDesc.getText().toString(),categories);
                             getLocationAndUpdatePlaces(true);
                         }
                         dialog.dismiss();

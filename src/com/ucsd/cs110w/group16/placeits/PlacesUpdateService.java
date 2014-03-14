@@ -225,7 +225,7 @@ public class PlacesUpdateService extends IntentService {
                 // type1|type2|type3
                 if (!placeIt.isActive())
                     continue;
-                String categories = placeIt.getTitle();
+                String categories = placeIt.getCategories();
                 //categories.replace(" ", "");
                 categories = categories.replace(", ", "|");
                 String locationStr = location.getLatitude() + ","
