@@ -694,6 +694,9 @@ public class MainActivity extends Activity implements OnMapClickListener,
         case R.id.action_placeits:
             displayPlaceitsList();
             return true;
+        case R.id.category_placeits:
+            showCategoricalInputDialog();
+            return true;
         }
         return false;
     }

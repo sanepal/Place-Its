@@ -9,6 +9,11 @@
         android:id="@+id/action_placeits"
         android:showAsAction="ifRoom"
         android:title="@string/action_placeits" />   
+        
+    <item
+        android:id="@+id/category_placeits"
+        android:showAsAction="ifRoom"
+        android:title="@string/category_placeits" /> 
 
     <item
         android:id="@+id/action_settings"
