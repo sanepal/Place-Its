@@ -175,7 +175,6 @@ public class MainActivity extends Activity implements OnMapClickListener,
 
         cPrefs = new CameraPositionStore(this);
         placeItManager = new PlaceItManager(this);
-        placeItManager.clearDB();
         setUpMapIfNeeded();
         displayActivePlaceIts();
         map.setMyLocationEnabled(true);
@@ -976,7 +975,78 @@ public class MainActivity extends Activity implements OnMapClickListener,
 	     }
 
 	     protected void onPostExecute(List<String> list) {
+	    	 
 	    	 String[] placeIt;
+	    	 List<String> inDB = new ArrayList<String>();
+	    	 List<PlaceIt> allPlace = new ArrayList<PlaceIt>();
+	    	 allPlace.addAll(placeItManager.getActivePlaceIts());
+	    	 allPlace.addAll(placeItManager.getInActivePlaceIts());
+	    	 List<String> mPlaceItNames = new ArrayList<String>(); 
+	    	 for (int i = 0; i < list.size(); i++)
+	    	 {
+	    		 placeIt = list.get(i).split("; ");
+	    		 mPlaceItNames.add(placeIt[0]);
+	         } 	    	  	    	 
+	    	 for (int i = 0; i < allPlace.size(); i++)
+	    	 {
+	    		 if (!mPlaceItNames.contains(allPlace.get(i).getTitle()))
+	    		 {
+	    			 placeItManager.removePlaceIt(allPlace.get(i));
+	    		 }
+	    		 else 
+	    		 {
+	    			 for (int x = 0; x < list.size(); x++)
+	    			 {
+	    				 placeIt = list.get(x).split("; ");
+	    				 if (placeIt[0].equals(allPlace.get(i).getTitle())) 
+	    				 {
+	    					 allPlace.get(i).setDesc(placeIt[1]);
+	    					 allPlace.get(i).setLocation(Double.parseDouble(placeIt[2]),
+	    							 Double.parseDouble(placeIt[3]));
+	    					 allPlace.get(i).setStatus(Boolean.parseBoolean(placeIt[4]));
+	    					 allPlace.get(i).setCategory(Boolean.parseBoolean(placeIt[5]));
+	    					 allPlace.get(i).setCategories(placeIt[6]);
+	    					 inDB.add(placeIt[0]);
+	    					 placeItManager.updatePlaceIt(allPlace.get(i));
+	    				 }
+	    			 } 
+	    		 }
+	    	 }
+	    	 for (int i  = 0; i < list.size(); i++)
+	    	 {
+	    		 placeIt = list.get(i).split("; ");
+	    		 if (!inDB.contains(placeIt[0]))
+	    		 {
+	    			 if (placeIt[5].equals("false"))
+	    			 {
+	    				 if (placeIt[4].equals("true"))
+	    				 {
+	    					 map.addMarker(new MarkerOptions()
+	    					 .position(new LatLng(Double.parseDouble(placeIt[2]),
+	    							 Double.parseDouble(placeIt[3])))
+	    							 .title(placeIt[0])
+	    							 .snippet(placeIt[1])
+	    							 .icon(BitmapDescriptorFactory 
+	    									 .fromResource(R.drawable.ic_placeit)));
+	    				}
+	    				 PlaceIt p = (placeItManager.createPlaceIt(placeIt[0],
+	    						 placeIt[1],
+	    						 new LatLng(Double.parseDouble(placeIt[2]),
+	    								 Double.parseDouble(placeIt[3])),
+	    								 Boolean.parseBoolean(placeIt[4])));
+	    				 if (placeIt[4].equals("true"))
+	    					 placeItManager.registerGeofence(p);
+	    			}
+	    			else if (placeIt[4].equals("true"))
+	    			{
+	    				placeItManager.createCategoryPlaceIt(placeIt[0],
+	    						placeIt[6],
+	    						Boolean.parseBoolean(placeIt[4]));
+	    			}
+	    		}
+	    	}
+	     
+	    	 /*String[] placeIt;
 	    	 PlaceIt mPLaceIt;
 	    	 for (int i = 0; i < list.size(); i++)
 	    	 {
@@ -1005,10 +1075,10 @@ public class MainActivity extends Activity implements OnMapClickListener,
 	    		 else if (placeIt[4].equals("true"))
 	    		 {
 	    			 placeItManager.createCategoryPlaceIt(placeIt[0],
-                    		 /*inputDesc.getText().toString(),*/placeIt[6],
+                    		 placeIt[6],
                     		 Boolean.parseBoolean(placeIt[4]));
 	    		 }
-	    	 }
+	    	 }*/
 	     }
 
 	 }

@@ -212,6 +212,17 @@ public class PlaceIt {
     public double getLatitude() {
         return mLatitude;
     }
+    
+    public void setCategories(String c)
+    {
+    	this.categories = c;
+    }
+    
+    public void setLocation(Double lat, Double longi)
+    {
+    	this.mLatitude = lat;
+    	this.mLongitude = longi;
+    }
 
     /**
      * Get the geofence longitude

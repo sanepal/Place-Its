@@ -81,18 +81,7 @@ public class PlaceItManager {
             return false;
         }
     }
-    
-    public void clearDB()
-    {
-    	mCurrentGeofences.clear();
-    	List<PlaceIt> placeIts = mDb.getAllActive();
-    	for (int i = 0; i < placeIts.size(); i++)
-    	{
-    		setInActive(placeIts.get(i));
-    	}
-    	mDb.clear();
-        
-    }
+   
     
     
     public void removePlaceItIntent(PlaceIt placeIt) {
