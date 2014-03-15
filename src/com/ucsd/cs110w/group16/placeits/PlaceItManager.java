@@ -84,7 +84,14 @@ public class PlaceItManager {
     
     public void clearDB()
     {
+    	mCurrentGeofences.clear();
+    	List<PlaceIt> placeIts = mDb.getAllActive();
+    	for (int i = 0; i < placeIts.size(); i++)
+    	{
+    		setInActive(placeIts.get(i));
+    	}
     	mDb.clear();
+        
     }
     
     
@@ -217,7 +224,6 @@ public class PlaceItManager {
         }
     }
     
-    
     public List<PlaceIt> getActivePlaceIts()
     {
         List<PlaceIt> activePlaceIts = mDb.getAllActive();
@@ -257,6 +263,11 @@ public class PlaceItManager {
     {
     	// Do we need to remove from the geofence here?
     	mDb.deletePlaceIt(p);
+    }
+    
+    public boolean exists(String t)
+    {
+    	return mDb.exists(t);
     }
 
     public void handleActivityResult(int requestCode, int resultCode,
