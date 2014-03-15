@@ -82,6 +82,10 @@ public class PlaceItManager {
         }
     }
     
+    public void clearDB()
+    {
+    	mDb.clear();
+    }
     
     
     public void removePlaceItIntent(PlaceIt placeIt) {

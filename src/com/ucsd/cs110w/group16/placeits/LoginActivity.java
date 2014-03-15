@@ -1,15 +1,38 @@
 package com.ucsd.cs110w.group16.placeits;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
@@ -50,6 +73,10 @@ public class LoginActivity extends Activity {
     private View mLoginStatusView;
     private TextView mLoginStatusMessageView;
     
+	private List<String> users = new ArrayList<String>();
+	private List<String> pw = new ArrayList<String>();
+	public static final String ACCOUNT_URI = "http://actraiin.appspot.com/product";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +114,9 @@ public class LoginActivity extends Activity {
                         attemptLogin();
                     }
                 });
+        
+		new getAccounts().execute(ACCOUNT_URI);
+
     }
 
     @Override
@@ -138,6 +168,7 @@ public class LoginActivity extends Activity {
             focusView = mEmailView;
             cancel = true;
         }
+        
 
         if (cancel) {
             // There was an error; don't attempt login and focus the first
@@ -151,6 +182,33 @@ public class LoginActivity extends Activity {
             mAuthTask = new UserLoginTask();
             mAuthTask.execute((Void) null);
         }
+    }
+    
+    private void login()
+    {
+    	MainActivity.mEmail = mEmail;
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(ACCOUNT_URI);
+
+			    try {
+			      List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+			      nameValuePairs.add(new BasicNameValuePair("name",
+			    		  mEmail));
+			      nameValuePairs.add(new BasicNameValuePair("description",
+			    		  mPassword));
+			      nameValuePairs.add(new BasicNameValuePair("action",
+				          "put"));
+			      post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+			 
+			      HttpResponse response = client.execute(post);
+			      BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+			      String line = "";
+			      while ((line = rd.readLine()) != null) {
+			      }
+
+			    } catch (IOException e) {
+			    }
+			
     }
 
     /**
@@ -210,15 +268,24 @@ public class LoginActivity extends Activity {
                 return false;
             }
 
-            for (String credential : DUMMY_CREDENTIALS) {
+            /*for (String credential : DUMMY_CREDENTIALS) {
                 String[] pieces = credential.split(":");
                 if (pieces[0].equals(mEmail)) {
                     // Account exists, return true if the password matches.
                     return pieces[1].equals(mPassword);
                 }
+            }*/
+            
+            if (users.contains(mEmail))
+            {
+            	if (!pw.get(users.indexOf(mEmail)).equals(mPassword))
+            	{
+            		return false;
+            	}
             }
 
             // TODO: register the new account here.
+            login();
             return true;
         }
 
@@ -244,4 +311,44 @@ public class LoginActivity extends Activity {
             showProgress(false);
         }
     }
+    
+	 private class getAccounts extends AsyncTask<String, Void, List<String>> {
+		 @Override
+	     protected List<String> doInBackground(String... url) {
+			 
+	    	    HttpClient client = new DefaultHttpClient();
+				HttpGet request = new HttpGet(url[0]);
+				List<String> list = new ArrayList<String>();
+				try {
+					HttpResponse response = client.execute(request);
+					HttpEntity entity = response.getEntity();
+					String data = EntityUtils.toString(entity);
+					JSONObject myjson;
+					
+					try {
+						myjson = new JSONObject(data);
+						JSONArray array = myjson.getJSONArray("data");
+						for (int i = 0; i < array.length(); i++) {
+							JSONObject obj = array.getJSONObject(i);
+							list.add(obj.get("name").toString());
+							users.add(obj.get("name").toString());
+							pw.add(obj.get("description").toString());
+						}
+						
+					} catch (JSONException e) {
+
+					}
+					
+				} catch (ClientProtocolException e) {
+
+				} catch (IOException e) {
+				}
+	         return list;
+	     }
+
+	     protected void onPostExecute(List<String> list) {
+				
+	     }
+
+	 }
 }

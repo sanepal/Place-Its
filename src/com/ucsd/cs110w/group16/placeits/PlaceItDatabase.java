@@ -208,5 +208,12 @@ List<PlaceIt> placeIts = new ArrayList<PlaceIt>();
 		        );
 		return placeIt;
 	}
+	
+	public void clear()
+	{
+		open();
+		database.delete(PlaceItDatabaseHelper.TABLE_NAME, null, null);
+		close();
+	}
 }
 

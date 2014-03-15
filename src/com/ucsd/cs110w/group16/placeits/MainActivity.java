@@ -1,12 +1,32 @@
 package com.ucsd.cs110w.group16.placeits;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -74,7 +94,9 @@ public class MainActivity extends Activity implements OnMapClickListener,
     private int selected = 0;
 
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-
+    public static String mEmail;
+    private static boolean firstStart = true;
+    
     /*
      * An instance of an inner class that receives broadcasts from listeners and
      * from the IntentService that receives geofence transition events
@@ -83,6 +105,11 @@ public class MainActivity extends Activity implements OnMapClickListener,
 
     // An intent filter for the broadcast receiver
     private IntentFilter mIntentFilter;
+    
+	private static final String PLACEIT_URI = "http://actraiin.appspot.com/item";
+    private String cName;
+    private String cDesc;
+    private LatLng cLoc;
 
     /*
      * (non-Javadoc)
@@ -148,12 +175,20 @@ public class MainActivity extends Activity implements OnMapClickListener,
 
         cPrefs = new CameraPositionStore(this);
         placeItManager = new PlaceItManager(this);
+        if (firstStart)
+        {
+        	placeItManager.clearDB();
+        	firstStart = false;
+        }
         setUpMapIfNeeded();
         displayActivePlaceIts();
         map.setMyLocationEnabled(true);
         map.setOnMapClickListener(this);
         map.setOnMarkerClickListener(this);
         handleIntent(getIntent());
+        
+		new getPlaceIts().execute(PLACEIT_URI);
+
     }
 
     /*
@@ -593,6 +628,8 @@ public class MainActivity extends Activity implements OnMapClickListener,
                                 .createPlaceIt(inputTitle.getText().toString(),
                                         inputDesc.getText().toString(),
                                         location)));
+                        postSinglePlaceIt(inputTitle.getText().toString(),
+                        		inputDesc.getText().toString(), location);
                     }
                 });
         builder.setNegativeButton("Cancel",
@@ -605,6 +642,47 @@ public class MainActivity extends Activity implements OnMapClickListener,
         AlertDialog dialog = builder.create();
         dialog.show();
     }
+    
+	private void postSinglePlaceIt(String name, String desc, LatLng arg) {
+		cName = name;
+		cDesc = desc;
+		cLoc = arg;
+		Thread t = new Thread() {
+
+			public void run() {
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(PLACEIT_URI);
+ 
+			    try {
+			      List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(5);
+			      nameValuePairs.add(new BasicNameValuePair("name",
+			    		  cName));
+			      nameValuePairs.add(new BasicNameValuePair("description",
+			    		  cDesc));
+			      nameValuePairs.add(new BasicNameValuePair("price",
+			    		  cDesc + "; " + 
+			    		  cLoc.latitude + "; " + cLoc.longitude + "; " +
+			              true + "; " + false + "; "+ "null"));
+			      nameValuePairs.add(new BasicNameValuePair("product",
+			    		  mEmail));
+			      nameValuePairs.add(new BasicNameValuePair("action",
+				          "put"));
+			      post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+			  
+			      HttpResponse response = client.execute(post);
+			      BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+			      String line = "";
+			      while ((line = rd.readLine()) != null) {
+			      }
+
+			    } catch (IOException e) {
+			    }
+			}
+		};
+
+		t.start();
+			
+	}
 
     /*
      * Shows the input dialog for Place it creation with regards to details
@@ -656,6 +734,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
                                 categories += ", "+input3;
                             placeItManager.createCategoryPlaceIt(inputTitle.getText().toString(),
                             		 /*inputDesc.getText().toString(),*/categories);
+                            postCategoryPlaceIt(inputTitle.getText().toString(), categories);
                             getLocationAndUpdatePlaces(true);
                         }
                         dialog.dismiss();
@@ -671,6 +750,46 @@ public class MainActivity extends Activity implements OnMapClickListener,
         AlertDialog dialog = builder.create();
         dialog.show();
     }
+    
+	private void postCategoryPlaceIt(String name, String categories) {
+		cName = name;
+		cDesc = categories;
+		Thread t = new Thread() {
+
+			public void run() {
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(PLACEIT_URI);
+ 
+			    try {
+			      List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(5);
+			      nameValuePairs.add(new BasicNameValuePair("name",
+			    		  cName));
+			      nameValuePairs.add(new BasicNameValuePair("description",
+			    		  cDesc));
+			      nameValuePairs.add(new BasicNameValuePair("price",
+			    		  "none; " + 
+			    		  "0; 0; " +
+			              true + "; " + true + "; "+ cDesc));
+			      nameValuePairs.add(new BasicNameValuePair("product",
+			    		  mEmail));
+			      nameValuePairs.add(new BasicNameValuePair("action",
+				          "put"));
+			      post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+			  
+			      HttpResponse response = client.execute(post);
+			      BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+			      String line = "";
+			      while ((line = rd.readLine()) != null) {
+			      }
+
+			    } catch (IOException e) {
+			    }
+			}
+		};
+
+		t.start();
+			
+	}
 
     /*
      * Called when the "My Place It's" button is clicked, opens up activity to
@@ -821,7 +940,76 @@ public class MainActivity extends Activity implements OnMapClickListener,
             Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
         }
     }
+    
+	 private class getPlaceIts extends AsyncTask<String, Void, List<String>> {
+		 @Override
+	     protected List<String> doInBackground(String... url) {
+			 
+	    	    HttpClient client = new DefaultHttpClient();
+				HttpGet request = new HttpGet(url[0]);
+				List<String> list = new ArrayList<String>();
+				try {
+					HttpResponse response = client.execute(request);
+					HttpEntity entity = response.getEntity();
+					String data = EntityUtils.toString(entity);
+					JSONObject myjson;
+					
 
+					try {
+						myjson = new JSONObject(data);
+						JSONArray array = myjson.getJSONArray("data");
+						for (int i = 0; i < array.length(); i++) {
+							JSONObject obj = array.getJSONObject(i);
+							if (obj.get("product").toString().equals(
+									mEmail))
+							   list.add(obj.get("name").toString() + 
+									   "; " + 
+									   obj.get("price").toString());
+						}
+					} catch (JSONException e) {
+
+					}
+					
+				} catch (ClientProtocolException e) {
+
+				} catch (IOException e) {
+
+				}
+	         return list;
+	     }
+
+	     protected void onPostExecute(List<String> list) {
+	    	 String[] placeIt;
+	    	 for (int i = 0; i < list.size(); i++)
+	    	 {
+	  
+	    		 placeIt = list.get(i).split("; ");
+	    		 if (placeIt[5].equals("false") && placeIt[4].equals("true"))
+	    		 {
+                 map.addMarker(new MarkerOptions()
+                 .position(new LatLng(Double.parseDouble(placeIt[2]),
+                		 Double.parseDouble(placeIt[3])))
+                 .title(placeIt[0])
+                 .snippet(placeIt[1])
+                 .icon(BitmapDescriptorFactory
+                         .fromResource(R.drawable.ic_placeit)));
+                  placeItManager.registerGeofence((placeItManager
+                 .createPlaceIt(placeIt[0],
+                         placeIt[1],
+                         new LatLng(Double.parseDouble(placeIt[2]),
+                        		 Double.parseDouble(placeIt[3])))));
+	    		 }
+	    		 else if (placeIt[4].equals("true"))
+	    		 {
+	    			 placeItManager.createCategoryPlaceIt(placeIt[0],
+                    		 /*inputDesc.getText().toString(),*/placeIt[6]);
+	    		 }
+	    	 }
+	     }
+
+	 }
+
+    
     /**
      * Sets up an alarm for scheduling weekly events
      */
