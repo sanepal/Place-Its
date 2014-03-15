@@ -977,12 +977,18 @@ public class MainActivity extends Activity implements OnMapClickListener,
 
 	     protected void onPostExecute(List<String> list) {
 	    	 String[] placeIt;
+	    	 PlaceIt mPLaceIt;
 	    	 for (int i = 0; i < list.size(); i++)
 	    	 {
 	  
 	    		 placeIt = list.get(i).split("; ");
 	    		 if (placeIt[5].equals("false"))
 	    		 {
+	    		     mPLaceIt=placeItManager.createPlaceIt(placeIt[0],
+                                     placeIt[1],
+                                     new LatLng(Double.parseDouble(placeIt[2]),
+                                             Double.parseDouble(placeIt[3])), 
+                                             Boolean.parseBoolean(placeIt[4]));
 	    			 if (placeIt[4].equals("true"))
 	    			 {
 	    				 map.addMarker(new MarkerOptions()
@@ -992,13 +998,9 @@ public class MainActivity extends Activity implements OnMapClickListener,
 	    						 .snippet(placeIt[1])
 	    						 .icon(BitmapDescriptorFactory
 	    						 .fromResource(R.drawable.ic_placeit)));
+	    				 placeItManager.registerGeofence(mPLaceIt);
 	    			 }
-                  placeItManager.registerGeofence((placeItManager
-                 .createPlaceIt(placeIt[0],
-                         placeIt[1],
-                         new LatLng(Double.parseDouble(placeIt[2]),
-                        		 Double.parseDouble(placeIt[3])), 
-                        		 Boolean.parseBoolean(placeIt[4]))));
+                  
 	    		 }
 	    		 else if (placeIt[4].equals("true"))
 	    		 {
