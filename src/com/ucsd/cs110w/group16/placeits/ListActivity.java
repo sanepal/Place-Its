@@ -1,7 +1,21 @@
 package com.ucsd.cs110w.group16.placeits;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+
+import com.google.android.gms.maps.model.LatLng;
 
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
@@ -45,6 +59,9 @@ public class ListActivity extends FragmentActivity implements
     private static List<PlaceIt> inActivePlaceIts;
     private static ArrayAdapter<PlaceIt> listOfActives;
     private static ArrayAdapter<PlaceIt> listOfInActives;
+    
+	private static final String PLACEIT_URI = "http://actraiin.appspot.com/item";
+    private static PlaceIt r;
     
 
     @Override
@@ -195,6 +212,7 @@ public class ListActivity extends FragmentActivity implements
                     	// Set place it to inactive and update the lists.
                     	PlaceIt removedPlaceIt = activePlaceIts.get(arg2);
                         placeItManager.setInActive(removedPlaceIt);
+                        updatePlaceIt(removedPlaceIt);
                     	activePlaceIts.remove(removedPlaceIt);
                     	inActivePlaceIts.add(removedPlaceIt);
                     	
@@ -225,6 +243,7 @@ public class ListActivity extends FragmentActivity implements
                     	PlaceIt repostedPlaceIt = inActivePlaceIts.get(arg2);
                     	placeItManager.setActive(repostedPlaceIt);
                         placeItManager.registerGeofence(repostedPlaceIt);
+                        updatePlaceIt(repostedPlaceIt);
                         activePlaceIts.add(repostedPlaceIt);
                         inActivePlaceIts.remove(repostedPlaceIt);
                         
@@ -269,6 +288,45 @@ public class ListActivity extends FragmentActivity implements
             }
             return rootView;
         }
+        
+    	private void updatePlaceIt(PlaceIt p) {
+    		r = p;
+    		Thread t = new Thread() {
+
+    			public void run() {
+    				HttpClient client = new DefaultHttpClient();
+    				HttpPost post = new HttpPost(PLACEIT_URI);
+     
+    			    try {
+    			      List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(5);
+    			      nameValuePairs.add(new BasicNameValuePair("name",
+    			    		  r.getTitle()));
+    			      nameValuePairs.add(new BasicNameValuePair("description",
+    			    		  r.getDesc()));
+    			      nameValuePairs.add(new BasicNameValuePair("price",
+    			    		  r.getDesc() + "; " + 
+    			    		  r.getLatitude() + "; " + r.getLongitude() + "; " +
+    			              r.isActive() + "; " + r.isCategory() + "; "+ r.getCategories()));
+    			      nameValuePairs.add(new BasicNameValuePair("product",
+    			    		  MainActivity.mEmail));
+    			      nameValuePairs.add(new BasicNameValuePair("action",
+    				          "put"));
+    			      post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+    			  
+    			      HttpResponse response = client.execute(post);
+    			      BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+    			      String line = "";
+    			      while ((line = rd.readLine()) != null) {
+    			      }
+
+    			    } catch (IOException e) {
+    			    }
+    			}
+    		};
+
+    		t.start();
+    			
+    	}
 
     }
 

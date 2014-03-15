@@ -17,7 +17,19 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 
 /**
  * This class receives geofence transition events from Location Services, in the
@@ -27,6 +39,8 @@ import java.util.List;
 public class ReceiveTransitionsIntentService extends IntentService {
     
     private PlaceItManager placeItManager;
+	private static final String PLACEIT_URI = "http://actraiin.appspot.com/item";
+    private PlaceIt r;
 
     /**
      * Sets an identifier for this class' background thread
@@ -160,6 +174,7 @@ public class ReceiveTransitionsIntentService extends IntentService {
         placeItManager = new PlaceItManager(getApplicationContext());
         PlaceIt activatedPlaceit = placeItManager.getPlaceIt((long) Integer.parseInt(ids));
         placeItManager.setInActive(activatedPlaceit);
+        updatePlaceIt(activatedPlaceit);
         // Set the notification contents
         builder.setSmallIcon(R.drawable.ic_placeit)
                .setContentTitle(activatedPlaceit.getTitle())
@@ -195,4 +210,43 @@ public class ReceiveTransitionsIntentService extends IntentService {
                 return getString(R.string.geofence_transition_unknown);
         }
     }
+    
+	private void updatePlaceIt(PlaceIt p) {
+		r = p;
+		Thread t = new Thread() {
+
+			public void run() {
+				HttpClient client = new DefaultHttpClient();
+				HttpPost post = new HttpPost(PLACEIT_URI);
+ 
+			    try {
+			      List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(5);
+			      nameValuePairs.add(new BasicNameValuePair("name",
+			    		  r.getTitle()));
+			      nameValuePairs.add(new BasicNameValuePair("description",
+			    		  r.getDesc()));
+			      nameValuePairs.add(new BasicNameValuePair("price",
+			    		  r.getDesc() + "; " + 
+			    		  r.getLatitude() + "; " + r.getLongitude() + "; " +
+			              r.isActive() + "; " + r.isCategory() + "; "+ r.getCategories()));
+			      nameValuePairs.add(new BasicNameValuePair("product",
+			    		  MainActivity.mEmail));
+			      nameValuePairs.add(new BasicNameValuePair("action",
+				          "put"));
+			      post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+			  
+			      HttpResponse response = client.execute(post);
+			      BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+			      String line = "";
+			      while ((line = rd.readLine()) != null) {
+			      }
+
+			    } catch (IOException e) {
+			    }
+			}
+		};
+
+		t.start();
+			
+	}
 }

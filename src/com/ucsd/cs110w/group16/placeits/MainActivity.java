@@ -175,11 +175,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
 
         cPrefs = new CameraPositionStore(this);
         placeItManager = new PlaceItManager(this);
-        if (firstStart)
-        {
-        	placeItManager.clearDB();
-        	firstStart = false;
-        }
+        placeItManager.clearDB();
         setUpMapIfNeeded();
         displayActivePlaceIts();
         map.setMyLocationEnabled(true);
@@ -251,6 +247,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
         // animate camera to last location
         map.animateCamera(CameraUpdateFactory.newCameraPosition(cPrefs
                 .getCameraPosition()), 18, null);
+        
         // out place its one map again
         displayActivePlaceIts();
         getLocationAndUpdatePlaces(true);
@@ -984,25 +981,30 @@ public class MainActivity extends Activity implements OnMapClickListener,
 	    	 {
 	  
 	    		 placeIt = list.get(i).split("; ");
-	    		 if (placeIt[5].equals("false") && placeIt[4].equals("true"))
+	    		 if (placeIt[5].equals("false"))
 	    		 {
-                 map.addMarker(new MarkerOptions()
-                 .position(new LatLng(Double.parseDouble(placeIt[2]),
-                		 Double.parseDouble(placeIt[3])))
-                 .title(placeIt[0])
-                 .snippet(placeIt[1])
-                 .icon(BitmapDescriptorFactory
-                         .fromResource(R.drawable.ic_placeit)));
+	    			 if (placeIt[4].equals("true"))
+	    			 {
+	    				 map.addMarker(new MarkerOptions()
+	    				 .position(new LatLng(Double.parseDouble(placeIt[2]),
+	    						 Double.parseDouble(placeIt[3])))
+	    						 .title(placeIt[0])
+	    						 .snippet(placeIt[1])
+	    						 .icon(BitmapDescriptorFactory
+	    						 .fromResource(R.drawable.ic_placeit)));
+	    			 }
                   placeItManager.registerGeofence((placeItManager
                  .createPlaceIt(placeIt[0],
                          placeIt[1],
                          new LatLng(Double.parseDouble(placeIt[2]),
-                        		 Double.parseDouble(placeIt[3])))));
+                        		 Double.parseDouble(placeIt[3])), 
+                        		 Boolean.parseBoolean(placeIt[4]))));
 	    		 }
 	    		 else if (placeIt[4].equals("true"))
 	    		 {
 	    			 placeItManager.createCategoryPlaceIt(placeIt[0],
-                    		 /*inputDesc.getText().toString(),*/placeIt[6]);
+                    		 /*inputDesc.getText().toString(),*/placeIt[6],
+                    		 Boolean.parseBoolean(placeIt[4]));
 	    		 }
 	    	 }
 	     }
