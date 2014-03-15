@@ -175,7 +175,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
 
         cPrefs = new CameraPositionStore(this);
         placeItManager = new PlaceItManager(this);
-        placeItManager.clearDB();
+        //placeItManager.clearDB();
         setUpMapIfNeeded();
         displayActivePlaceIts();
         map.setMyLocationEnabled(true);
@@ -260,7 +260,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
      */
     @Override
     protected void onPause() {
-        super.onPause();
+        super.onPause();        
         prefsEditor.putBoolean(PlaceItUtils.EXTRA_KEY_IN_BACKGROUND, true).commit();
         cPrefs.setCameraPosition(map.getCameraPosition());
     }
@@ -273,6 +273,9 @@ public class MainActivity extends Activity implements OnMapClickListener,
      * that the search intent does not start a new MainActivity
      */
     protected void onNewIntent(Intent intent) {
+        //placeItManager.clearDB();
+		new getPlaceIts().execute(PLACEIT_URI);
+		
         setIntent(intent);
         handleIntent(intent);
     }
@@ -977,6 +980,8 @@ public class MainActivity extends Activity implements OnMapClickListener,
 
 	     protected void onPostExecute(List<String> list) {
 	    	 String[] placeIt;
+			 placeItManager.clearDB();
+
 	    	 for (int i = 0; i < list.size(); i++)
 	    	 {
 	  

@@ -107,7 +107,7 @@ public class ListActivity extends FragmentActivity implements
         // Update all these static members when the ListView is created.
         placeItManager = new PlaceItManager(this);
         activePlaceIts = placeItManager.getActivePlaceIts();
-        inActivePlaceIts = placeItManager.getInActivePlaceIts();
+        inActivePlaceIts = placeItManager.getInActivePlaceIts();       
         listOfActives = new ArrayAdapter<PlaceIt>(this, R.layout.list_repost, R.id.text, activePlaceIts);
         listOfInActives = new ArrayAdapter<PlaceIt>(this, R.layout.list_delete, R.id.text, inActivePlaceIts);
     }
@@ -327,6 +327,7 @@ public class ListActivity extends FragmentActivity implements
     		t.start();
     			
     	}
+    	
 
     }
 

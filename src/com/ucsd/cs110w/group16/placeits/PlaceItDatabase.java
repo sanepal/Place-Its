@@ -215,5 +215,26 @@ List<PlaceIt> placeIts = new ArrayList<PlaceIt>();
 		database.delete(PlaceItDatabaseHelper.TABLE_NAME, null, null);
 		close();
 	}
+	
+	public boolean exists(String t)
+	{
+		boolean status = false;
+		// Open the database
+		open();
+		
+		try
+		{
+		   // Retrieve the object with matching ID from the database.
+		   Cursor cursor = database.query(PlaceItDatabaseHelper.TABLE_NAME, PlaceItDatabaseHelper.ALL_COLUMNS,
+				PlaceItDatabaseHelper.COLUMN_NAME + "=" + t, null, null, null, null);
+		
+		   status = cursor.moveToFirst();
+		   cursor.close();
+		}
+		catch(Exception e){}
+		close(); // should be in activity's onDelete instead?
+		
+		return status;
+	}
 }
 
