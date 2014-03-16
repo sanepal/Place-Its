@@ -310,8 +310,8 @@ public class PlaceIt {
     @Override
     public String toString() {
     	if (isCategory)
-    		return title + ": " + categories + "\n" + desc + "\n(" + mLatitude + ", " + mLongitude + ")";
+    		return title + ": " + categories + "\n" + desc + "\n";
     	else
-    		return title + ": " + desc + "\n(" + mLatitude + ", " + mLongitude + ")";
+    		return title + ": " + desc + "\n";
     }
 }

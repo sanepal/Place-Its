@@ -706,7 +706,6 @@ public class MainActivity extends Activity implements OnMapClickListener,
                         String input3 = option3.getSelectedItem().toString();
                         if (input.isEmpty() && input2.isEmpty()
                                 && input3.isEmpty()) {
-                            Log.d(PlaceItUtils.APPTAG, "none");
                             Toast.makeText(getBaseContext(),
                                     "Select at least 1 category",
                                     Toast.LENGTH_LONG).show();
@@ -954,7 +953,6 @@ public class MainActivity extends Activity implements OnMapClickListener,
 							{
 							   list.add(obj.get("name").toString().split("; ")[0]+
 									   obj.get("price").toString());
-							   Log.d("HI", list.get(i).toString());
 							}
 						}
 					} catch (JSONException e) {

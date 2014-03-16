@@ -313,8 +313,7 @@ public class ListActivity extends FragmentActivity implements
     			  
     			      HttpResponse response = client.execute(post);
     			      BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-    			      String line = "";
-    			      while ((line = rd.readLine()) != null) {
+    			      while ((rd.readLine()) != null) {
     			      }
 
     			    } catch (IOException e) {
