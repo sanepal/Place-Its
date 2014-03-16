@@ -264,7 +264,6 @@ public class MainActivity extends Activity implements OnMapClickListener,
     protected void onPause() {
         super.onPause();
 		new getPlaceIts().execute(PLACEIT_URI);
-		
         prefsEditor.putBoolean(PlaceItUtils.EXTRA_KEY_IN_BACKGROUND, true).commit();
         cPrefs.setCameraPosition(map.getCameraPosition());
     }
@@ -657,13 +656,13 @@ public class MainActivity extends Activity implements OnMapClickListener,
 			    try {
 			      List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(5);
 			      nameValuePairs.add(new BasicNameValuePair("name",
-			    		  cName + "; " + cDesc + "; " + 
-					    		  cLoc.latitude + "; " + cLoc.longitude + "; " +
-					              true + "; " + false + "; "+ "null; " + mEmail));
+			    		  cName + "; " + mEmail));
 			      nameValuePairs.add(new BasicNameValuePair("description",
 			    		  cDesc));
 			      nameValuePairs.add(new BasicNameValuePair("price",
-                          " "));
+			    		  "; " + cDesc + "; " + 
+					    		  cLoc.latitude + "; " + cLoc.longitude + "; " +
+					              true + "; " + false + "; "+ "null; " + mEmail));
 			      nameValuePairs.add(new BasicNameValuePair("product",
 			    		  mEmail));
 			      nameValuePairs.add(new BasicNameValuePair("action",
@@ -764,11 +763,11 @@ public class MainActivity extends Activity implements OnMapClickListener,
 			    try {
 			      List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(5);
 			      nameValuePairs.add(new BasicNameValuePair("name",
-			    		  cName + "; none; 0; 0; true; true; " + cDesc + "; " + mEmail));
+			    		  cName + "; " + mEmail));
 			      nameValuePairs.add(new BasicNameValuePair("description",
 			    		  cDesc));
 			      nameValuePairs.add(new BasicNameValuePair("price",
-			    		  " " ));
+			    		  "; ; 0; 0; true; true; " +cDesc + "; "+ mEmail));
 			      nameValuePairs.add(new BasicNameValuePair("product",
 			    		  mEmail));
 			      nameValuePairs.add(new BasicNameValuePair("action",
@@ -963,7 +962,9 @@ public class MainActivity extends Activity implements OnMapClickListener,
 							if (obj.get("product").toString().equals(
 									mEmail))
 							{
-							   list.add(obj.get("name").toString());
+							   list.add(obj.get("name").toString().split("; ")[0]+
+									   obj.get("price").toString());
+							   Log.d("HI", list.get(i).toString());
 							}
 						}
 					} catch (JSONException e) {
@@ -1059,40 +1060,6 @@ public class MainActivity extends Activity implements OnMapClickListener,
 	    		}
 	    	}
 	    	displayActivePlaceIts();
-	     
-	    	 /*String[] placeIt;
-	    	 PlaceIt mPLaceIt;
-	    	 for (int i = 0; i < list.size(); i++)
-	    	 {
-	  
-	    		 placeIt = list.get(i).split("; ");
-	    		 if (placeIt[5].equals("false"))
-	    		 {
-	    		     mPLaceIt=placeItManager.createPlaceIt(placeIt[0],
-                                     placeIt[1],
-                                     new LatLng(Double.parseDouble(placeIt[2]),
-                                             Double.parseDouble(placeIt[3])), 
-                                             Boolean.parseBoolean(placeIt[4]));
-	    			 if (placeIt[4].equals("true"))
-	    			 {
-	    				 map.addMarker(new MarkerOptions()
-	    				 .position(new LatLng(Double.parseDouble(placeIt[2]),
-	    						 Double.parseDouble(placeIt[3])))
-	    						 .title(placeIt[0])
-	    						 .snippet(placeIt[1])
-	    						 .icon(BitmapDescriptorFactory
-	    						 .fromResource(R.drawable.ic_placeit)));
-	    				 placeItManager.registerGeofence(mPLaceIt);
-	    			 }
-                  
-	    		 }
-	    		 else if (placeIt[4].equals("true"))
-	    		 {
-	    			 placeItManager.createCategoryPlaceIt(placeIt[0],
-                    		 placeIt[6],
-                    		 Boolean.parseBoolean(placeIt[4]));
-	    		 }
-	    	 }*/
 	     }
 
 	 }

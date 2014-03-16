@@ -222,13 +222,14 @@ public class ReceiveTransitionsIntentService extends IntentService {
 			    try {
 			      List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(5);
 			      nameValuePairs.add(new BasicNameValuePair("name",
-			    		  r.getTitle()));
+			    		  r.getTitle() +"; " + MainActivity.mEmail));
 			      nameValuePairs.add(new BasicNameValuePair("description",
 			    		  r.getDesc()));
 			      nameValuePairs.add(new BasicNameValuePair("price",
-			    		  r.getDesc() + "; " + 
-			    		  r.getLatitude() + "; " + r.getLongitude() + "; " +
-			              r.isActive() + "; " + r.isCategory() + "; "+ r.getCategories()));
+			    		  "; "+ r.getDesc() + "; " + 
+	    			    		  r.getLatitude() + "; " + r.getLongitude() + "; " +
+	    			              r.isActive() + "; " + r.isCategory() + "; "+ r.getCategories()+
+	    			              "; " + MainActivity.mEmail));
 			      nameValuePairs.add(new BasicNameValuePair("product",
 			    		  MainActivity.mEmail));
 			      nameValuePairs.add(new BasicNameValuePair("action",

@@ -7,24 +7,35 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -197,7 +208,7 @@ public class ListActivity extends FragmentActivity implements
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main_dummy,
                     container, false);
-            
+
             ListView dummyListView = (ListView) rootView
                     .findViewById(R.id.section_label);
             
@@ -300,14 +311,14 @@ public class ListActivity extends FragmentActivity implements
     			    try {
     			      List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(5);
     			      nameValuePairs.add(new BasicNameValuePair("name",
-    			    		  r.getTitle() +"; "+ r.getDesc() + "; " + 
-    	    			    		  r.getLatitude() + "; " + r.getLongitude() + "; " +
-    	    			              r.isActive() + "; " + r.isCategory() + "; "+ r.getCategories()+
-    	    			              "; " + MainActivity.mEmail));
+    			    		  r.getTitle() + "; " + MainActivity.mEmail));
     			      nameValuePairs.add(new BasicNameValuePair("description",
     			    		  r.getDesc()));
     			      nameValuePairs.add(new BasicNameValuePair("price",
-                              " "));
+    			    		  "; "+ r.getDesc() + "; " + 
+    	    			    		  r.getLatitude() + "; " + r.getLongitude() + "; " +
+    	    			              r.isActive() + "; " + r.isCategory() + "; "+ r.getCategories()+
+    	    			              "; " + MainActivity.mEmail));
     			      nameValuePairs.add(new BasicNameValuePair("product",
     			    		  MainActivity.mEmail));
     			      nameValuePairs.add(new BasicNameValuePair("action",
