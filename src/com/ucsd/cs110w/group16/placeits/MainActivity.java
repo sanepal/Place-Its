@@ -246,7 +246,8 @@ public class MainActivity extends Activity implements OnMapClickListener,
         // animate camera to last location
         map.animateCamera(CameraUpdateFactory.newCameraPosition(cPrefs
                 .getCameraPosition()), 18, null);
-        
+		new getPlaceIts().execute(PLACEIT_URI);
+
         // out place its one map again
         displayActivePlaceIts();
         getLocationAndUpdatePlaces(true);
