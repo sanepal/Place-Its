@@ -1001,6 +1001,13 @@ public class MainActivity extends Activity implements OnMapClickListener,
 	    				 placeIt = list.get(x).split("; ");
 	    				 if (placeIt[0].equals(allPlace.get(i).getTitle())) 
 	    				 {
+	    					 boolean requestGeo = false;
+	    					 if (allPlace.get(i).isActive() == false &&
+	    							 placeIt[4].equals("true"))
+	    						 requestGeo = true;
+	    					 if (allPlace.get(i).isActive() == true &&
+	    							 placeIt[4].equals("false"))
+	    						 placeItManager.setInActive(allPlace.get(i));
 	    					 allPlace.get(i).setDesc(placeIt[1]);
 	    					 allPlace.get(i).setLocation(Double.parseDouble(placeIt[2]),
 	    							 Double.parseDouble(placeIt[3]));
@@ -1009,6 +1016,8 @@ public class MainActivity extends Activity implements OnMapClickListener,
 	    					 allPlace.get(i).setCategories(placeIt[6]);
 	    					 inDB.add(placeIt[0]);
 	    					 placeItManager.updatePlaceIt(allPlace.get(i));
+	    					 if (requestGeo)
+	    						 placeItManager.registerGeofence(allPlace.get(i));
 	    				 }
 	    			 } 
 	    		 }
