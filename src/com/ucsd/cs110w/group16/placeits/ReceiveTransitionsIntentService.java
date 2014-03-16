@@ -139,11 +139,6 @@ public class ReceiveTransitionsIntentService extends IntentService {
         Intent notificationIntent =
                 new Intent(getApplicationContext(),MainActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        //set intent action and add the place it id to the intent so that our mainactivity can react
-        notificationIntent.setAction("com.ucsd.cs110w.group16.placeits.launchAppWithPlaceIt");
-        Bundle notificationBundle = new Bundle();
-        notificationBundle.putInt("PlaceItId", Integer.parseInt(ids));
-        notificationIntent.putExtras(notificationBundle);
         // Construct a task stack
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         // Adds the main Activity to the task stack as the parent
@@ -158,14 +153,6 @@ public class ReceiveTransitionsIntentService extends IntentService {
         Intent dismissReceive = new Intent();  
         dismissReceive.setAction("com.ucsd.cs110w.group16.placeits.dismiss");
         PendingIntent pendingIntentDismiss = PendingIntent.getBroadcast(this, 0, dismissReceive, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        
-        Intent snoozeReceive = new Intent();  
-        snoozeReceive.setAction("com.ucsd.cs110w.group16.placeits.snooze");
-        Bundle snoozeBundle = new Bundle();            
-        snoozeBundle.putInt("PlaceItId",Integer.parseInt(ids));
-        dismissReceive.putExtras(snoozeBundle);
-        PendingIntent pendingIntentSnooze = PendingIntent.getBroadcast(this, 0, snoozeReceive, PendingIntent.FLAG_UPDATE_CURRENT);
         
 
         // Get a notification builder that's compatible with platform versions >= 4

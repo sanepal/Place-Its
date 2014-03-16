@@ -3,30 +3,37 @@ package com.ucsd.cs110w.group16.placeits.test;
 import com.robotium.solo.Solo;
 import com.ucsd.cs110w.group16.placeits.ListActivity;
 import com.ucsd.cs110w.group16.placeits.MainActivity;
+import com.ucsd.cs110w.group16.placeits.LoginActivity;
 import com.ucsd.cs110w.group16.placeits.R;
 
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.DisplayMetrics;
 
 public class ListActivityTest extends
-        ActivityInstrumentationTestCase2<MainActivity> {
+        ActivityInstrumentationTestCase2<LoginActivity> {
     private Solo solo;
     private int sWidth;
     private int sHeight;
     
     public ListActivityTest() {
-        super(MainActivity.class);        
+        super(LoginActivity.class);
     }
 
     protected void setUp() throws Exception {
-        super.setUp();
-        solo = new Solo(getInstrumentation(), getActivity());
+        super.setUp();                
+        solo = new Solo(getInstrumentation(), getActivity());        
         DisplayMetrics displaymetrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay()
                 .getMetrics(displaymetrics);
         sHeight = displaymetrics.heightPixels;
         sWidth = displaymetrics.widthPixels;
+        
     }
+    
+    @Override
+    public void tearDown() throws Exception {
+         solo.finishOpenedActivities();
+   }
     
     /*
      * Given that the user has created a Place It
@@ -36,6 +43,9 @@ public class ListActivityTest extends
      * the place it should not show up on the map
      */
     public void testListRemove() {
+        solo.enterText(0, "tester2@test.com");
+        solo.enterText(1, "loginactivitytest");
+        solo.clickOnButton("Sign in or register");
         //make the place it
         solo.assertCurrentActivity("MainActivity", MainActivity.class);
         int fromX = (sWidth/2) - (sWidth/3);
@@ -72,6 +82,9 @@ public class ListActivityTest extends
      * the place it should show back up on the map
      */
     public void testListRepost() {
+        solo.enterText(0, "tester2@test.com");
+        solo.enterText(1, "loginactivitytest");
+        solo.clickOnButton("Sign in or register");
         //make the place it
         solo.assertCurrentActivity("MainActivity", MainActivity.class);
         int fromX = (sWidth/2) - (sWidth/3);

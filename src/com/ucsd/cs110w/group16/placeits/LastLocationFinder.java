@@ -27,7 +27,6 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.util.Log;
 
 /**
  * Optimized implementation of Last Location Finder for devices running
@@ -65,7 +64,7 @@ public class LastLocationFinder {
         // The calling Activity will likely (or have already) request ongoing
         // updates using the Fine location provider.
         criteria = new Criteria();
-        criteria.setAccuracy(Criteria.ACCURACY_LOW);
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
 
         // Construct the Pending Intent that will be broadcast by the oneshot
         // location update.
@@ -90,7 +89,6 @@ public class LastLocationFinder {
         Location bestResult = null;
         float bestAccuracy = Float.MAX_VALUE;
         long bestTime = Long.MIN_VALUE;
-
         // Iterate through all the providers on the system, keeping
         // note of the most accurate result within the acceptable time limit.
         // If no result is found within maxTime, return the newest Location.
@@ -108,11 +106,11 @@ public class LastLocationFinder {
                 } else if (time < minTime && bestAccuracy == Float.MAX_VALUE
                         && time > bestTime) {
                     bestResult = location;
+                    bestAccuracy = accuracy;
                     bestTime = time;
                 }
             }
         }
-
         // If the best result is beyond the allowed time limit, or the accuracy
         // of the
         // best result is wider than the acceptable maximum distance, request a
@@ -121,7 +119,7 @@ public class LastLocationFinder {
         // requesting regular
         // location updates every [minTime] and [minDistance].
         if (locationListener != null
-                && (bestTime < minTime || bestAccuracy > maxDistance)) {
+                && (bestTime > minTime || bestAccuracy > maxDistance)) {
             IntentFilter locIntentFilter = new IntentFilter(
                     SINGLE_LOCATION_UPDATE_ACTION);
             context.registerReceiver(singleUpdateReceiver, locIntentFilter);

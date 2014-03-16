@@ -105,6 +105,7 @@ public class MainActivityTest extends
         assertTrue(solo.searchText("Select the location"));
         solo.clickInList(0);
         solo.clickOnScreen(sWidth / 2, sHeight / 2); 
+        solo.waitForDialogToOpen();
         assertTrue(solo.searchText("Create Place"));        
     }
 

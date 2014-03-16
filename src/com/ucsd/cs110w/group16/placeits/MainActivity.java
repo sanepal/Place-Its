@@ -22,11 +22,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningServiceInfo;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
-import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -91,12 +88,9 @@ public class MainActivity extends Activity implements OnMapClickListener,
     private PendingIntent locationListenerPendingIntent;
     private PendingIntent locationListenerPassivePendingIntent;
 
-    private int selected = 0;
 
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     public static String mEmail;
-    private static boolean firstStart = true;
-    
     /*
      * An instance of an inner class that receives broadcasts from listeners and
      * from the IntentService that receives geofence transition events
@@ -533,7 +527,6 @@ public class MainActivity extends Activity implements OnMapClickListener,
 
     @Override
     public void onMapClick(final LatLng location) {
-        selected = 0;
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.prompt);
         builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
@@ -671,8 +664,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
 			  
 			      HttpResponse response = client.execute(post);
 			      BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-			      String line = "";
-			      while ((line = rd.readLine()) != null) {
+			      while ((rd.readLine()) != null) {
 			      }
 
 			    } catch (IOException e) {
@@ -776,8 +768,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
 			  
 			      HttpResponse response = client.execute(post);
 			      BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-			      String line = "";
-			      while ((line = rd.readLine()) != null) {
+			      while ((rd.readLine()) != null) {
 			      }
 
 			    } catch (IOException e) {
@@ -956,7 +947,6 @@ public class MainActivity extends Activity implements OnMapClickListener,
 					try {
 						myjson = new JSONObject(data);
 						JSONArray array = myjson.getJSONArray("data");
-						String s;
 						for (int i = 0; i < array.length(); i++) {
 							JSONObject obj = array.getJSONObject(i);
 							if (obj.get("product").toString().equals(
