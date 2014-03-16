@@ -534,27 +534,14 @@ public class MainActivity extends Activity implements OnMapClickListener,
 
     @Override
     public void onMapClick(final LatLng location) {
-    	showSingleInputDialog(location);
-        /*selected = 0;
+        selected = 0;
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.prompt);
-        builder.setSingleChoiceItems(R.array.choices, selected,
-                new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        selected = which;
-
-                    }
-                });
         builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                if (selected == 0)
-                    showSingleInputDialog(location);
-                else
-                    showCategoricalInputDialog();
+                showSingleInputDialog(location);
             }
         });
         builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
@@ -565,7 +552,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
             }
         });
         AlertDialog alert = builder.create();
-        alert.show();*/
+        alert.show();
     }
 
     /*
