@@ -123,8 +123,8 @@ public final class PlaceItUtils {
 
     public static final CharSequence GEOFENCE_ID_DELIMITER = ",";
 
-    public static final float DEFAULT_RADIUS = 800f;    
-    public static final float MAX_DISTANCE = DEFAULT_RADIUS;
+    public static final float DEFAULT_RADIUS = 700f;    
+    public static final float MAX_DISTANCE = 800f;
     public static final long MAX_TIME = 15000;
 
     public static final String CONSTRUCTED_LOCATION_PROVIDER = "CONSTRUCTED_LOCATION_PROVIDER";
@@ -149,6 +149,8 @@ public final class PlaceItUtils {
     public static final String SP_KEY_LAST_LIST_UPDATE_LAT = "SP_KEY_LAST_LIST_UPDATE_LAT";
     public static final String SP_KEY_LAST_LIST_UPDATE_LNG = "SP_KEY_LAST_LIST_UPDATE_LNG";
     public static final String SP_KEY_RUN_ONCE = "SP_KEY_RUN_ONCE";
+
+    public static final String SP_KEY_FOLLOW_LOCATION_CHANGES = "SP_KEY_FOLLOW_LOCATION_CHANGES";
 
     
     

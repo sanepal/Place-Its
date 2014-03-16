@@ -69,10 +69,10 @@ public class PassiveLocationChangedReceiver extends BroadcastReceiver {
             // Get the last location we used to get a listing.
             long lastTime = prefs.getLong(
                     PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_TIME, Long.MIN_VALUE);
-            long lastLat = prefs.getLong(
-                    PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_LAT, Long.MIN_VALUE);
-            long lastLng = prefs.getLong(
-                    PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_LNG, Long.MIN_VALUE);
+            double lastLat = prefs.getFloat(
+                    PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_LAT, Float.MIN_VALUE);
+            double lastLng = prefs.getFloat(
+                    PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_LNG, Float.MIN_VALUE);
             Location lastLocation = new Location(
                     PlaceItUtils.CONSTRUCTED_LOCATION_PROVIDER);
             lastLocation.setLatitude(lastLat);

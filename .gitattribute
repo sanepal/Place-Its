@@ -5,10 +5,34 @@
 # to native line endings on checkout.
 *.c text
 *.h text
+*.css           text
+*.df            text
+*.htm           text
+*.html          text
+*.java          text
+*.js            text
+*.json          text
+*.jsp           text
+*.jspf          text
+*.properties    text
+*.sh            text
+*.sql           text
+*.svg           text
+*.tld           text
+*.txt           text
+*.xml           text
 
 # Declare files that will always have CRLF line endings on checkout.
 *.sln text eol=crlf
 
 # Denote all files that are truly binary and should not be modified.
-*.png binary
-*.jpg binary
+*.class         binary
+*.dll           binary
+*.gif           binary
+*.ico           binary
+*.jar           binary
+*.jpg           binary
+*.jpeg          binary
+*.png           binary
+*.so            binary
+*.war           binary

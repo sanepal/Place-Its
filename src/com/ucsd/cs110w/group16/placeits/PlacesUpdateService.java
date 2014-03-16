@@ -62,23 +62,6 @@ public class PlacesUpdateService extends IntentService {
     protected void setIntentRedeliveryMode(boolean enable) {
     }
 
-    /**
-     * Returns battery status. True if less than 10% remaining.
-     * 
-     * @param battery
-     *            Battery Intent
-     * @return Battery is low
-     */
-    protected boolean getIsLowBattery(Intent battery) {
-        /*
-         * float pctLevel = (float) battery.getIntExtra(
-         * BatteryManager.EXTRA_LEVEL, 1) /
-         * battery.getIntExtra(BatteryManager.EXTRA_SCALE, 1); return pctLevel <
-         * 0.15;
-         */
-        return false;
-    }
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -100,20 +83,13 @@ public class PlacesUpdateService extends IntentService {
         Location location = new Location(
                 PlaceItUtils.CONSTRUCTED_LOCATION_PROVIDER);
         float radius = PlaceItUtils.DEFAULT_RADIUS;
-
+        
         Bundle extras = intent.getExtras();
         if (intent.hasExtra(PlaceItUtils.EXTRA_KEY_LOCATION)) {
             location = (Location) (extras.get(PlaceItUtils.EXTRA_KEY_LOCATION));
             radius = extras.getFloat(PlaceItUtils.EXTRA_KEY_RADIUS,
                     PlaceItUtils.DEFAULT_RADIUS);
         }
-        // Check if we're in a low battery situation.
-        /*
-         * IntentFilter batIntentFilter = new IntentFilter(
-         * Intent.ACTION_BATTERY_CHANGED); Intent battery =
-         * registerReceiver(null, batIntentFilter); lowBattery =
-         * getIsLowBattery(battery);
-         */
 
         // Check if we're connected to a data network, and if so - if it's a
         // mobile network.
@@ -167,12 +143,12 @@ public class PlacesUpdateService extends IntentService {
                 long lastTime = prefs.getLong(
                         PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_TIME,
                         Long.MIN_VALUE);
-                long lastLat = prefs.getLong(
+                double lastLat = prefs.getFloat(
                         PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_LAT,
-                        Long.MIN_VALUE);
-                long lastLng = prefs.getLong(
+                        Float.MIN_VALUE);
+                double lastLng = prefs.getFloat(
                         PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_LNG,
-                        Long.MIN_VALUE);
+                        Float.MIN_VALUE);
                 Location lastLocation = new Location(
                         PlaceItUtils.CONSTRUCTED_LOCATION_PROVIDER);
                 lastLocation.setLatitude(lastLat);
@@ -181,6 +157,7 @@ public class PlacesUpdateService extends IntentService {
                 // If update time and distance bounds have been passed, do an
                 // update.
                 if ((lastTime < System.currentTimeMillis()-PlaceItUtils.MAX_TIME) ||(lastLocation.distanceTo(location) > PlaceItUtils.MAX_DISTANCE))
+                    Log.d(TAG,"doUpdate = true"+lastLocation.toString() + " " + location.toString());
                     doUpdate = true;
             }
 
@@ -212,7 +189,6 @@ public class PlacesUpdateService extends IntentService {
             Log.d(TAG, "Not prefetching due to low battery");
         }
 
-        long currentTime = System.currentTimeMillis();
         URL url;
 
         try {
@@ -292,6 +268,7 @@ public class PlacesUpdateService extends IntentService {
                             
                             placeIt.setLocation(placeLocation);
                             placeIt.setDesc(name + ",\n " + vicinity);
+                            placeItManager.removePlaceItIntent(placeIt);
                             placeItManager.updatePlaceIt(placeIt);
                             placeItManager.registerGeofence(placeIt);
                             break;
@@ -308,12 +285,12 @@ public class PlacesUpdateService extends IntentService {
             }
             // Save the last update time and place to the Shared
             // Preferences.
-            prefsEditor.putLong(
+            prefsEditor.putFloat(
                     PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_LAT,
-                    (long) location.getLatitude());
-            prefsEditor.putLong(
+                    (float) location.getLatitude());
+            prefsEditor.putFloat(
                     PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_LNG,
-                    (long) location.getLongitude());
+                    (float) location.getLongitude());
             prefsEditor.putLong(
                     PlaceItUtils.SP_KEY_LAST_LIST_UPDATE_TIME,
                     System.currentTimeMillis());

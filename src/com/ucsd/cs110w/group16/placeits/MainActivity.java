@@ -250,7 +250,8 @@ public class MainActivity extends Activity implements OnMapClickListener,
 
         // out place its one map again
         displayActivePlaceIts();
-        getLocationAndUpdatePlaces(true);
+        boolean followLocationChanges = prefs.getBoolean(PlaceItUtils.SP_KEY_FOLLOW_LOCATION_CHANGES, true);
+        getLocationAndUpdatePlaces(followLocationChanges);
     }
 
     /*
@@ -336,9 +337,20 @@ public class MainActivity extends Activity implements OnMapClickListener,
         findLastLocationTask.execute();
 
         // If we have requested location updates, turn them on here.
-        // toggleUpdatesWhenLocationChanges(updateWhenLocationChanges);
+        toggleUpdatesWhenLocationChanges(updateWhenLocationChanges);
     }
+    /**
+     * Choose if we should receive location updates. 
+     * @param updateWhenLocationChanges Request location updates
+     */
+    protected void toggleUpdatesWhenLocationChanges(boolean updateWhenLocationChanges) {   
+      // Save the location update status in shared preferences
+      prefsEditor.putBoolean(PlaceItUtils.SP_KEY_FOLLOW_LOCATION_CHANGES, updateWhenLocationChanges).commit();
 
+      // Start or stop listening for location changes
+      if (updateWhenLocationChanges)
+        requestLocationUpdates();
+    }
     /**
      * Start listening for location updates.
      */
