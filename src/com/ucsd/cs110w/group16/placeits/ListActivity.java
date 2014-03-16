@@ -300,13 +300,14 @@ public class ListActivity extends FragmentActivity implements
     			    try {
     			      List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(5);
     			      nameValuePairs.add(new BasicNameValuePair("name",
-    			    		  r.getTitle()));
+    			    		  r.getTitle() +"; "+ r.getDesc() + "; " + 
+    	    			    		  r.getLatitude() + "; " + r.getLongitude() + "; " +
+    	    			              r.isActive() + "; " + r.isCategory() + "; "+ r.getCategories()+
+    	    			              "; " + MainActivity.mEmail));
     			      nameValuePairs.add(new BasicNameValuePair("description",
     			    		  r.getDesc()));
     			      nameValuePairs.add(new BasicNameValuePair("price",
-    			    		  r.getDesc() + "; " + 
-    			    		  r.getLatitude() + "; " + r.getLongitude() + "; " +
-    			              r.isActive() + "; " + r.isCategory() + "; "+ r.getCategories()));
+                              " "));
     			      nameValuePairs.add(new BasicNameValuePair("product",
     			    		  MainActivity.mEmail));
     			      nameValuePairs.add(new BasicNameValuePair("action",

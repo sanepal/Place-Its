@@ -176,7 +176,6 @@ public class MainActivity extends Activity implements OnMapClickListener,
         cPrefs = new CameraPositionStore(this);
         placeItManager = new PlaceItManager(this);
         setUpMapIfNeeded();
-        displayActivePlaceIts();
         map.setMyLocationEnabled(true);
         map.setOnMapClickListener(this);
         map.setOnMarkerClickListener(this);
@@ -246,12 +245,14 @@ public class MainActivity extends Activity implements OnMapClickListener,
         // animate camera to last location
         map.animateCamera(CameraUpdateFactory.newCameraPosition(cPrefs
                 .getCameraPosition()), 18, null);
-		new getPlaceIts().execute(PLACEIT_URI);
 
         // out place its one map again
-        displayActivePlaceIts();
+        //displayActivePlaceIts();
         boolean followLocationChanges = prefs.getBoolean(PlaceItUtils.SP_KEY_FOLLOW_LOCATION_CHANGES, true);
         getLocationAndUpdatePlaces(followLocationChanges);
+        
+		new getPlaceIts().execute(PLACEIT_URI);
+
     }
 
     /*
@@ -263,6 +264,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
     protected void onPause() {
         super.onPause();
 		new getPlaceIts().execute(PLACEIT_URI);
+		
         prefsEditor.putBoolean(PlaceItUtils.EXTRA_KEY_IN_BACKGROUND, true).commit();
         cPrefs.setCameraPosition(map.getCameraPosition());
     }
@@ -275,9 +277,10 @@ public class MainActivity extends Activity implements OnMapClickListener,
      * that the search intent does not start a new MainActivity
      */
     protected void onNewIntent(Intent intent) {
-		new getPlaceIts().execute(PLACEIT_URI);
         setIntent(intent);
         handleIntent(intent);
+		new getPlaceIts().execute(PLACEIT_URI);
+
     }
 
     /*
@@ -667,13 +670,13 @@ public class MainActivity extends Activity implements OnMapClickListener,
 			    try {
 			      List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(5);
 			      nameValuePairs.add(new BasicNameValuePair("name",
-			    		  cName));
+			    		  cName + "; " + cDesc + "; " + 
+					    		  cLoc.latitude + "; " + cLoc.longitude + "; " +
+					              true + "; " + false + "; "+ "null; " + mEmail));
 			      nameValuePairs.add(new BasicNameValuePair("description",
 			    		  cDesc));
 			      nameValuePairs.add(new BasicNameValuePair("price",
-			    		  cDesc + "; " + 
-			    		  cLoc.latitude + "; " + cLoc.longitude + "; " +
-			              true + "; " + false + "; "+ "null"));
+                          " "));
 			      nameValuePairs.add(new BasicNameValuePair("product",
 			    		  mEmail));
 			      nameValuePairs.add(new BasicNameValuePair("action",
@@ -774,13 +777,11 @@ public class MainActivity extends Activity implements OnMapClickListener,
 			    try {
 			      List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(5);
 			      nameValuePairs.add(new BasicNameValuePair("name",
-			    		  cName));
+			    		  cName + "; none; 0; 0; true; true; " + cDesc + "; " + mEmail));
 			      nameValuePairs.add(new BasicNameValuePair("description",
 			    		  cDesc));
 			      nameValuePairs.add(new BasicNameValuePair("price",
-			    		  "none; " + 
-			    		  "0; 0; " +
-			              true + "; " + true + "; "+ cDesc));
+			    		  " " ));
 			      nameValuePairs.add(new BasicNameValuePair("product",
 			    		  mEmail));
 			      nameValuePairs.add(new BasicNameValuePair("action",
@@ -969,13 +970,14 @@ public class MainActivity extends Activity implements OnMapClickListener,
 					try {
 						myjson = new JSONObject(data);
 						JSONArray array = myjson.getJSONArray("data");
+						String s;
 						for (int i = 0; i < array.length(); i++) {
 							JSONObject obj = array.getJSONObject(i);
 							if (obj.get("product").toString().equals(
 									mEmail))
-							   list.add(obj.get("name").toString() + 
-									   "; " + 
-									   obj.get("price").toString());
+							{
+							   list.add(obj.get("name").toString());
+							}
 						}
 					} catch (JSONException e) {
 
@@ -1069,6 +1071,7 @@ public class MainActivity extends Activity implements OnMapClickListener,
 	    			}
 	    		}
 	    	}
+	    	displayActivePlaceIts();
 	     
 	    	 /*String[] placeIt;
 	    	 PlaceIt mPLaceIt;
